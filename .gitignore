@@ -1,0 +1,31 @@
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database files
+*.sqlite
+*.sqlite3
+dump.rdb
+
+# Build output
+dist/
+build/
+.cache/
+
+# Editor settings
+.vscode/
+.idea/
+.DS_Store
+*.swp
+*.swo
