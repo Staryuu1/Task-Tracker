@@ -41,12 +41,8 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
 5. **Akses Aplikasi**
    Buka browser dan akses: `http://localhost:3000`
 
-## 📸 Preview
-![Task Tracker Screenshot](screenshot.png)
+
 
 ## 🔥 Kontribusi
 Jika Anda ingin berkontribusi, silakan fork repository ini dan buat pull request dengan perubahan Anda.
-
-## 📄 Lisensi
-Proyek ini menggunakan lisensi MIT. Silakan lihat file `LICENSE` untuk informasi lebih lanjut.
 
