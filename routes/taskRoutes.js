@@ -9,7 +9,7 @@ router.get("/", ensureAuthenticated, async (req, res) => {
     try {
         const tasks = await Task.find({ user: req.user.id });
         const notes = await Notes.find({ user: req.user.id });
-        res.render("test", { tasks, notes });
+        res.render("Dashboard", { tasks, notes });
     } catch (err) {
         console.error(err);
         res.status(500).send("Internal Server Error");
@@ -141,6 +141,16 @@ router.post("/addnotes", ensureAuthenticated, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: "Error adding task" });
+    }
+});
+router.post("/deletenotes/:id", ensureAuthenticated, async (req, res) => {
+   
+    try {
+        await Notes.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+        res.redirect("/tasks");
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error deleting task");
     }
 });
 module.exports = router;
