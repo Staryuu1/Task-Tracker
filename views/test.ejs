@@ -1,0 +1,441 @@
+<html>
+<head>
+    <title>Task Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body class="bg-gray-100 text-gray-900">
+    <div class="container mx-auto p-4">
+        <!-- Navbar -->
+        <nav class="flex justify-between items-center mb-4">
+            <div class="flex items-center">
+                <h1 class="text-2xl font-bold"><i ></i> Task Tracker</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="#" class="text-gray-700 hover:text-black">Profile</a>
+                <a href="auth/Logout" class="text-gray-700 hover:text-black">Logout</a>
+            </div>
+        </nav>
+
+        <!-- Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+            <div class="bg-white p-4 rounded shadow ">
+                <h2 class="text-lg font-semibold">Total Tasks</h2>
+                <p class="text-2xl font-bold"><%= tasks.length %></p>
+                <p class="text-gray-500"><%= tasks.filter(task => task.completed).length %> Completed</p>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+                <h2 class="text-lg font-semibold">Pending Task</h2>
+                <p class="text-2xl font-bold"><%= tasks.filter(task => task.completed).length %></p>
+                <p class="text-gray-500"> Remember To complete</p>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+                <h2 class="text-lg font-semibold">Due Soon</h2>
+                <p class="text-2xl font-bold"><%= tasks.filter(task => {
+                    const dueDate = new Date(task.dueDate);
+                    const today = new Date();
+                    const diffTime = dueDate - today;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays > 0 && diffDays <= 7;
+                }).length %></p>                
+                <p class="text-gray-500">in the next 7 days</p>
+            </div>
+            <div class="bg-white p-4 rounded shadow">
+                <h2 class="text-lg font-semibold">Completed</h2>
+                <p class="text-2xl font-bold">
+                    <%= tasks.length > 0 ? Math.round((tasks.filter(task => task.completed).length / tasks.length) * 100) : 0 %>%
+                </p>                
+                <p class="text-gray-500">Completion rate</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+<div class="mb-4">
+    <ul class="flex border-b">
+        <li class="mr-1">
+            <a class="tab bg-white inline-block py-2 px-4 text-black font-semibold cursor-pointer" data-category="all">All</a>
+        </li>
+        <li class="mr-1">
+            <a class="tab bg-gray-200 inline-block py-2 px-4 text-gray-500 hover:text-black font-semibold cursor-pointer" data-category="Task">Task</a>
+        </li>
+        <li class="mr-1">
+            <a class="tab bg-gray-200 inline-block py-2 px-4 text-gray-500 hover:text-black font-semibold cursor-pointer" data-category="Personal">Personal</a>
+        </li>
+        <li class="mr-1">
+            <a class="tab bg-gray-200 inline-block py-2 px-4 text-gray-500 hover:text-black font-semibold cursor-pointer" data-category="Work">Work</a>
+        </li>
+    </ul>
+</div>
+
+<!-- Task List -->
+<div id="task-container" class="bg-white p-4 rounded shadow mb-4">
+    <h2 class="text-xl font-bold mb-2">Tasks</h2>
+
+    <% tasks.forEach(task => { %>
+        <div class="task-item flex justify-between items-center mb-2" data-category="<%= task.category %>">
+                <div>
+                    <h3 class="text-lg font-semibold"><%= task.title %></h3>
+                    <p class="text-gray-500"><%= task.description %></p>
+                    <p class="text-gray-500"><i class="fas fa-calendar-alt"></i> <%= new Date(task.dueDate).toDateString() %></p>
+                    <p class="text-gray-500">
+                        Status: <span class="<%= task.completed ? 'text-green-500' : 'text-red-500' %>">
+                            <%= task.completed ? 'Completed' : 'Pending' %>
+                        </span>
+                    </p>
+                    <p class="text-gray-500">
+                        Priority: <span class="<%= task.priority === 'high'? 'text-red-500' : task.priority ==='medium'? 'text-yellow-500' : 'text-green-500' %>">
+                            <%= task.priority %>
+                        </span>
+                    </p>
+                </div>
+                <div class="flex items-center">
+                    <form action="/tasks/complete/<%= task._id %>" method="POST">
+                        <% if (!task.completed) { %>
+                            <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded"><i class="fas fa-check"></i></button>
+                        <% } %>
+                    </form>
+                    <button class="ml-2 text-gray-500 hover:text-black edit-task" data-id="<%= task._id %>" ><i class="fas fa-edit"></i></button>
+                    <button class="ml-2 text-gray-500 hover:text-black delete-task" data-id="<%= task._id %>"><i class="fas fa-trash"></i></button>
+                </div>
+        </div>
+    <% }) %>
+</div>
+
+
+            
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white p-4 rounded shadow">
+                <h2 class="text-xl font-bold mb-2">Notes</h2>
+                <p class="text-gray-500 mb-4">Keep track of your important notes</p>
+                <div class="space-y-4 mb-4">
+                    <% notes.forEach(note => { %>
+                        <div class="bg-gray-100 p-4 rounded">
+                            <h3 class="text-lg font-semibold"><%= note.title %></h3>
+                            <p class="text-gray-500"><%= note.notes %></p>
+                        </div>
+                    <% }) %>
+                </div>
+                <button id="add-notes-btn" class="bg-black text-white px-4 py-2 rounded"><i class="fas fa-plus"></i> Add Notes</button>
+            </div> 
+            
+            
+            <div class="bg-white p-4 rounded shadow">
+                <h2 class="text-xl font-bold mb-2">Tasks Due Today</h2>
+                <p class="text-gray-500 mb-4">Tasks that need your immediate attention</p>
+                <% let todayTasks = tasks.filter(task => new Date(task.dueDate).toDateString() === new Date().toDateString()); %>
+                <% if (todayTasks.length > 0) { %>
+                    <ul>
+                        <% todayTasks.forEach(task => { %>
+                            <li class="mb-2"><strong><%= task.title %></strong> - <%= task.description %></li>
+                        <% }) %>
+                    </ul>
+                <% } else { %>
+                    <p class="text-gray-500 mb-4">No tasks due today</p>
+                <% } %>
+                <button id="add-task-btn" class="bg-black text-white px-4 py-2 rounded"><i class="fas fa-plus"></i> Add Task</button>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const tabs = document.querySelectorAll(".tab");
+        const tasks = document.querySelectorAll(".task-item");
+
+        tabs.forEach(tab => {
+            tab.addEventListener("click", function () {
+                const category = this.getAttribute("data-category");
+                tabs.forEach(t => t.classList.remove("bg-white", "text-black"));
+                tabs.forEach(t => t.classList.add("bg-gray-200", "text-gray-500"));
+                this.classList.add("bg-white", "text-black");
+                tasks.forEach(task => {
+                    task.style.display = (category === "all" || task.getAttribute("data-category") === category) ? "flex" : "none";
+                });
+            });
+        });
+
+        document.querySelectorAll(".delete-task").forEach(button => {
+            button.addEventListener("click", function (event) {
+                event.preventDefault();
+                const form = this.closest(".delete-task-form");
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
+        });
+
+        document.getElementById("add-task-btn").addEventListener("click", function () {
+            Swal.fire({
+                title: "Add Task",
+                html: `
+                    <input type="text" id="task-title" class="swal2-input" placeholder="Task Title">
+                    <input type="text" id="task-desc" class="swal2-input" placeholder="Task Description">
+                    <input type="date" id="task-date" class="swal2-input">
+                    <select id="task-priority" class="swal2-select">
+                        <option value="" disabled selected>Select Priority</option>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                    </select>
+                    <select id="task-category" class="swal2-select">
+                        <option value="">Select Category</option>
+                        <option value="Work">Work</option>
+                        <option value="Personal">Personal</option>
+                        <option value="Task">Others</option>
+                    </select>
+                `,
+                showCancelButton: true,
+                confirmButtonText: "Add",
+                preConfirm: () => {
+                    const title = document.getElementById("task-title").value;
+                    const description = document.getElementById("task-desc").value;
+                    const dueDate = document.getElementById("task-date").value;
+                    const priority = document.getElementById("task-priority").value;
+                    const category = document.getElementById("task-category").value;
+
+                    if (!title || !description || !dueDate || !priority || !category) {
+                        Swal.showValidationMessage("Please enter all fields");
+                        return false;
+                    }
+
+                    return { title, description, dueDate, priority, category };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log("Sending data:", result.value); // Debugging before fetch
+                    fetch("/tasks/add", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(result.value)
+                    })
+                    .then(async (response) => {
+                        if (!response.ok) {
+                            // Handle non-OK responses (e.g., 400, 500)
+                            const errorData = await response.json(); // Parse error response
+                            throw new Error(errorData.error || "Failed to add task");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Server Response:", data);
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            text: data.message || "Task added successfully",
+                        }).then(() => {
+                            location.reload(); // Reload the page to reflect changes
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: error.message || "An error occurred while adding the task",
+                        });
+                    });
+                }
+            });
+        });
+
+        document.querySelectorAll(".edit-task").forEach(button => {
+            button.addEventListener("click", async function () {
+                const taskId = this.getAttribute("data-id");
+
+                try {
+                    const response = await fetch(`/tasks/get/${taskId}`, {
+                        method: "GET",
+                        headers: { "Content-Type": "application/json" },
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch task");
+                    }
+
+                    const task = await response.json();
+                    console.log("Fetched Task:", task);
+
+                    Swal.fire({
+                        title: "Edit Task",
+                        html: `
+                            <input type="text" id="task-title" class="swal2-input" placeholder="Task Title" value="${task.title}">
+                            <input type="text" id="task-desc" class="swal2-input" placeholder="Task Description" value="${task.description}">
+                            <input type="date" id="task-date" class="swal2-input" value="${task.dueDate}">
+                            <select id="task-priority" class="swal2-select">
+                                <option value="low" ${task.priority === 'low' ? 'selected' : ''}>Low</option>
+                                <option value="medium" ${task.priority === 'medium' ? 'selected' : ''}>Medium</option>
+                                <option value="high" ${task.priority === 'high' ? 'selected' : ''}>High</option>
+                            </select>
+                            <select id="task-category" class="swal2-select">
+                                <option value="Work" ${task.category === 'Work' ? 'selected' : ''}>Work</option>
+                                <option value="Personal" ${task.category === 'Personal' ? 'selected' : ''}>Personal</option>
+                                <option value="Task" ${task.category === 'Task' ? 'selected' : ''}>Others</option>
+                            </select>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: "Save",
+                        preConfirm: () => {
+                            const title = document.getElementById("task-title").value.trim();
+                            const description = document.getElementById("task-desc").value.trim();
+                            const dueDate = document.getElementById("task-date").value;
+                            const priority = document.getElementById("task-priority").value;
+                            const category = document.getElementById("task-category").value;
+
+                            if (!title || !description || !dueDate || !priority || !category) {
+                                Swal.showValidationMessage("Please enter all fields");
+                                return false;
+                            }
+
+                            return { title, description, dueDate, priority, category };
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed && result.value) {
+                            console.log("Sending data:", result.value);
+
+                            fetch(`/tasks/edit/${taskId}`, {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify(result.value),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.error) throw new Error(data.error);
+                                Swal.fire({
+                                    icon: "success",
+                                    title: "Success",
+                                    text: "Task updated successfully",
+                                }).then(() => location.reload());
+                            })
+                            .catch(error => {
+                                console.error("Error updating:", error);
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Error",
+                                    text: error.message || "Failed to update task",
+                                });
+                            });
+                        }
+                    });
+
+                } catch (error) {
+                    console.error("Error fetching task:", error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: error.message || "Failed to fetch task",
+                    });
+                }
+            });
+        });
+        document.addEventListener("click", function (event) {
+            const button = event.target.closest(".delete-task");
+            if (!button) return; // Jika bukan tombol delete, hentikan fungsi
+
+            event.preventDefault();
+            const taskId = button.getAttribute("data-id");
+            console.log("Deleting Task ID:", taskId); // Pastikan ini muncul di console
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it!"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/tasks/delete/${taskId}`, {
+                        method: "POST",
+                    })
+                    .then(() => {
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "Your task has been deleted.",
+                            icon: "success"
+                        }).then(() => {
+                            location.reload();
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        Swal.fire("Error", "Failed to delete task", "error");
+                    });
+                }
+            });
+        });
+
+        document.getElementById("add-notes-btn").addEventListener("click", function () {
+            Swal.fire({
+                title: "Add Task",
+                html: `
+                    <input type="text" id="notes-title" class="swal2-input" placeholder="Notes Title">
+                    <input type="text" id="notes-desc" class="swal2-input" placeholder="Notes">
+                `,
+                showCancelButton: true,
+                confirmButtonText: "Add",
+                preConfirm: () => {
+                    const title = document.getElementById("notes-title").value;
+                    const notes = document.getElementById("notes-desc").value;
+
+                    if (!title || !notes ) {
+                        Swal.showValidationMessage("Please enter all fields");
+                        return false;
+                    }
+
+                    return { title, notes};
+                }
+            }).then((result) => {
+                console.log(result.value);
+                if (result.isConfirmed) {
+                    console.log("Sending data:", result.value); // Debugging before fetch
+                    fetch("/tasks/addnotes", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(result.value)
+                    })
+                    .then(async (response) => {
+                        if (!response.ok) {
+                            // Handle non-OK responses (e.g., 400, 500)
+                            const errorData = await response.json(); // Parse error response
+                            throw new Error(errorData.error || "Failed to add notes");
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Server Response:", data);
+                        Swal.fire({
+                            icon: "success",
+                            title: "Success",
+                            text: data.message || "notes added successfully",
+                        }).then(() => {
+                            location.reload(); // Reload the page to reflect changes
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: error.message || "An error occurred while adding the task",
+                        });
+                    });
+                }
+            });
+        });
+    });
+</script>
+</html>
+
+
