@@ -1,6 +1,7 @@
 <html>
 <head>
     <title>Task Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
@@ -27,7 +28,7 @@
             </div>
             <div class="bg-white p-4 rounded shadow">
                 <h2 class="text-lg font-semibold">Pending Task</h2>
-                <p class="text-2xl font-bold"><%= tasks.filter(task => task.completed).length %></p>
+                <p class="text-2xl font-bold"><%= tasks.filter(task => !task.completed).length %></p>
                 <p class="text-gray-500"> Remember To complete</p>
             </div>
             <div class="bg-white p-4 rounded shadow">
