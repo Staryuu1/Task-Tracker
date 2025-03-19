@@ -38,9 +38,9 @@ app.use(passport.session());
 // Routes
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/tasks', require('./routes/taskRoutes'));
+app.use('/profile', require('./routes/profileRoutes'));
 
 
-// Home route
 app.get('/', (req, res) => {
     if (!req.isAuthenticated()) return res.redirect('/auth/login');
     res.redirect('/tasks');

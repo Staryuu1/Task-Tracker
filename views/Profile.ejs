@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <div class="container mx-auto p-6">
+        <!-- Navbar -->
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl font-bold">Profile</h1>
+            <div>
+                <a href="/tasks" class="text-gray-600 hover:text-gray-800 mr-4">Home</a>
+                <a href="/auth/logout" class="text-gray-600 hover:text-gray-800">Logout</a>
+            </div>
+        </div>
+
+        <!-- Profile Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold"><%= user.username %></h2>
+                <p class="text-gray-600"><%= user.email %></p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Personal Information -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Personal Information</h3>
+
+                    <div class="flex justify-between items-center">
+                        <p><strong>Full Name:</strong> <%= profile.name %></p>
+                        <button class="text-gray-500 hover:text-black">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <p><strong>Email:</strong> <%= user.email %></p>
+                        <button class="text-gray-500 hover:text-black">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <p><strong>Phone:</strong> <%= profile.phoneNumber %></p>
+                        <button class="text-gray-500 hover:text-black">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Change Password -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-3">Change Password</h3>
+                    <form>
+                        <div class="mb-4">
+                            <label class="block text-gray-700" for="current-password">Current Password</label>
+                            <input class="w-full px-4 py-2 border rounded" id="current-password" type="password"/>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700" for="new-password">New Password</label>
+                            <input class="w-full px-4 py-2 border rounded" id="new-password" type="password"/>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700" for="confirm-password">Confirm New Password</label>
+                            <input class="w-full px-4 py-2 border rounded" id="confirm-password" type="password"/>
+                        </div>
+                        <button class="bg-blue-500 text-white px-4 py-2 rounded w-full" type="submit">
+                            Update Password
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

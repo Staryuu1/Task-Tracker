@@ -12,7 +12,7 @@ router.get('/logout', (req, res) => {
 
 router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
-    await new User({ username: req.body.username, password: hashedPassword }).save();
+    await new User({ username: req.body.username, email: req.body.email, password: hashedPassword }).save();
     res.redirect('/auth/login');
 });
 
