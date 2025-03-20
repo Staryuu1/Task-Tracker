@@ -46,7 +46,7 @@ app.get('/', (req, res) => {
     res.redirect('/tasks');
 });
 app.get('/qrcode', (req, res) => {
-    res.sendFile(__dirname + '/public/qr.png');
+    res.sendFile(__dirname + '/modules/public/qr.png');
 });
 // Global error-handling middleware
 app.use((err, req, res, next) => {
