@@ -24,6 +24,7 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
   - [x] Kirim notifikasi kepada pengguna sehari sebelum tugas jatuh tempo.   
   - [x] Pastikan notifikasi dikirim hanya untuk tugas yang belum selesai. 
   - [x] Hanya Mengirim ke Nomor yang sudah verifikasi
+  - [ ] Testing dan Mencari bug atau Feature yang di perlukan
 - [ ] ** Improve Profile**
   - [x] Bisa mengedit nama dan nomor hp
   - [x] Mengirim verifikasi saat mengedit nomor hp
@@ -41,6 +42,7 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
 3. **Buat File Konfigurasi `.env`**
    Buat file `.env` di root proyek dan tambahkan:
    ```env
+   BASE_URL=localhost:3000 (ganti dengan domain/url yang kamu gunakan)
    MONGO_URI=your_mongodb_connection_string
    SESSION_SECRET=your_secret_key
    ```
