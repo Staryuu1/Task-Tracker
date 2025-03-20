@@ -90,35 +90,43 @@ const checkAndSendReminders = async () => {
     console.log('🔍 Mengecek tugas yang jatuh tempo besok...');
 
     try {
-        const tomorrow = new Date();
-        console.log(tomorrow.getDate().toString());
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        tomorrow.setHours(0, 0, 0, 0);
-        console.log(tomorrow.getDate().toString());
-
-        const tasks = await Task.find({
-            dueDate: { $gte: tomorrow, $lt: new Date(tomorrow.getTime() + 86400000) },
-            completed: false
-        });
-        
-        for (const task of tasks) {
-            let profile = await Profile.findOne({ user: task.user });
-        
-            if (profile && profile.phoneNumber && profile.phoneVerified == true && task.completed == false) {
-                const message = `🔔 *Pengingat: Deadline Tugas Besok!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nPastikan tugas ini selesai tepat waktu! ✅`;
-
-                await sendWhatsAppMessage(profile.phoneNumber, message);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); 
+    
+        const reminderDays = [4, 3, 2, 1]; 
+    
+        for (const daysBefore of reminderDays) {
+            const reminderDate = new Date(today);
+            reminderDate.setDate(today.getDate() + daysBefore); // Tambah hari sesuai daftar
+    
+            const nextDay = new Date(reminderDate);
+            nextDay.setDate(reminderDate.getDate() + 1);
+    
+            const tasks = await Task.find({
+                dueDate: { $gte: reminderDate, $lt: nextDay },
+                completed: false
+            });
+    
+            for (const task of tasks) {
+                let profile = await Profile.findOne({ user: task.user });
+    
+                if (profile && profile.phoneNumber && profile.phoneVerified) {
+                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
+    
+                    await sendWhatsAppMessage(profile.phoneNumber, message);
+                }
             }
+    
+            console.log(`📢 Pengingat dikirim untuk ${tasks.length} tugas yang deadline dalam ${daysBefore} hari.`);
         }
-
-        console.log(`📢 Pengingat dikirim untuk ${tasks.length} tugas.`);
     } catch (error) {
         console.error('❌ Gagal mengecek tugas:', error);
     }
+    
 };
 
 // Cron job untuk mengirim pengingat setiap hari jam 06:00
-cron.schedule('30 6 * * *', async () => {
+cron.schedule('0 7 * * *', async () => {
     await checkAndSendReminders();
 });
 
