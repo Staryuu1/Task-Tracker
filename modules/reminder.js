@@ -6,7 +6,6 @@ const cron = require('node-cron');
 const mongoose = require('mongoose');
 const Task = require('../models/Task'); // Sesuaikan dengan model Task
 const Profile = require("../models/Profile");
-const User = require("../models/User");
 const path = require("path");
 
 // Inisialisasi WhatsApp Client dengan session yang tersimpan
@@ -18,8 +17,22 @@ const client = new Client({
 client.on("qr", async (qr) => {
     console.log("QR Code baru dibuat, menyimpannya sebagai gambar...");
     
-    const qrPath = path.join(__dirname, "public", "qr.png");
-    await qrcode.toFile(qrPath, qr);
+    const publicDir = path.join(__dirname, "public");
+    const qrPath = path.join(publicDir, "qr.png");
+
+   
+    if (!fs.existsSync(publicDir)) {
+        fs.mkdirSync(publicDir, { recursive: true });
+        console.log('Folder "public" dibuat.');
+    }
+
+    
+    try {
+        await qrcode.toFile(qrPath, qr);
+        console.log(`QR Code disimpan, akses di: /public/qr.png`);
+    } catch (error) {
+        console.error("Gagal menyimpan QR Code:", error);
+    }
 
     console.log("QR Code disimpan, akses di: /public/qr.png");
 });
