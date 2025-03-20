@@ -91,8 +91,10 @@ const checkAndSendReminders = async () => {
 
     try {
         const tomorrow = new Date();
+        console.log(tomorrow.getDate().toString());
         tomorrow.setDate(tomorrow.getDate() + 1);
         tomorrow.setHours(0, 0, 0, 0);
+        console.log(tomorrow.getDate().toString());
 
         const tasks = await Task.find({
             dueDate: { $gte: tomorrow, $lt: new Date(tomorrow.getTime() + 86400000) },
