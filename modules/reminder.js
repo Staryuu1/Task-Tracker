@@ -91,17 +91,18 @@ const checkAndSendReminders = async () => {
 
     try {
         const today = new Date();
-        today.setHours(0, 0, 0, 0); 
-    
+        today.setUTCHours(0, 0, 0, 0); // Reset jam ke UTC 00:00:00
+        
         const reminderDays = [4, 3, 2, 1]; 
     
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
-            reminderDate.setDate(today.getDate() + daysBefore); // Tambah hari sesuai daftar
+            reminderDate.setUTCDate(today.getUTCDate() + daysBefore);  
     
             const nextDay = new Date(reminderDate);
-            nextDay.setDate(reminderDate.getDate() + 1);
+            nextDay.setUTCDate(reminderDate.getUTCDate() + 1); 
     
+           
             const tasks = await Task.find({
                 dueDate: { $gte: reminderDate, $lt: nextDay },
                 completed: false
@@ -111,7 +112,10 @@ const checkAndSendReminders = async () => {
                 let profile = await Profile.findOne({ user: task.user });
     
                 if (profile && profile.phoneNumber && profile.phoneVerified) {
-                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
+                   
+                    const formattedDueDate = new Date(task.dueDate).toUTCString(); 
+    
+                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${formattedDueDate}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
     
                     await sendWhatsAppMessage(profile.phoneNumber, message);
                 }
@@ -122,6 +126,7 @@ const checkAndSendReminders = async () => {
     } catch (error) {
         console.error('❌ Gagal mengecek tugas:', error);
     }
+    
     
 };
 
