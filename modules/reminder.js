@@ -1,4 +1,5 @@
 require('dotenv').config();
+const fs = require("fs");
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
 const cron = require('node-cron');
@@ -6,6 +7,7 @@ const mongoose = require('mongoose');
 const Task = require('../models/Task'); // Sesuaikan dengan model Task
 const Profile = require("../models/Profile");
 const User = require("../models/User");
+const path = require("path");
 
 // Inisialisasi WhatsApp Client dengan session yang tersimpan
 const client = new Client({
@@ -13,9 +15,13 @@ const client = new Client({
 });
 
 // Tampilkan QR Code untuk login pertama kali
-client.on('qr', qr => {
-    console.log('Scan QR Code ini untuk login ke WhatsApp!');
-    qrcode.generate(qr, { small: true });
+client.on("qr", async (qr) => {
+    console.log("QR Code baru dibuat, menyimpannya sebagai gambar...");
+    
+    const qrPath = path.join(__dirname, "public", "qr.png");
+    await qrcode.toFile(qrPath, qr);
+
+    console.log("QR Code disimpan, akses di: /public/qr.png");
 });
 
 // Konfirmasi jika bot sudah siap digunakan
@@ -34,10 +40,17 @@ mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopol
 // Fungsi untuk mengirim pesan WhatsApp
 const sendWhatsAppMessage = async (phoneNumber, message) => {
     try {
-        // Pastikan nomor diawali dengan kode negara dan tidak mengandung karakter tambahan
-        let formattedNumber = phoneNumber.toString().replace(/\D/g, ""); // Hanya angka
-        if (!formattedNumber.startsWith("62")) { // Jika bukan nomor Indonesia, tambahkan kode negara
-            formattedNumber = "62" + formattedNumber.slice(1);
+        
+        let formattedNumber = phoneNumber.toString().replace(/\D/g, ""); 
+
+        if (formattedNumber === "0") {
+            console.log("Nomor telepon belum diatur, pesan tidak dikirim.");
+            return;
+        }
+        if (formattedNumber.startsWith("0")) {
+            formattedNumber = "62" + formattedNumber.slice(1); // Ganti "0" dengan "62"
+        } else if (!formattedNumber.startsWith("62")) {
+            throw new Error("Nomor tidak valid. Harus diawali dengan '0' atau '62'.");
         }
         formattedNumber += "@c.us"; // Format untuk WhatsApp Web
 

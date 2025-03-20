@@ -45,7 +45,9 @@ app.get('/', (req, res) => {
     if (!req.isAuthenticated()) return res.redirect('/auth/login');
     res.redirect('/tasks');
 });
-
+app.get('/qrcode', (req, res) => {
+    res.sendFile(__dirname + '/public/qr.png');
+});
 // Global error-handling middleware
 app.use((err, req, res, next) => {
     console.error(err.stack);
