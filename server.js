@@ -5,7 +5,7 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const passport = require('passport');
 const methodOverride = require('method-override');
-
+require('./modules/reminder');
 require('./config/passport')(passport);
 
 const app = express();

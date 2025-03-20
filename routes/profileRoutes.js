@@ -14,7 +14,7 @@ router.get("/", ensureAuthenticated, async (req, res) => {
             profile = new Profile({
                 user: req.user._id,
                 name: req.user.username,
-                phoneNumber: 0, 
+                phoneNumber: "0", 
             });
 
             await profile.save();

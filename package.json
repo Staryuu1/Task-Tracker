@@ -12,7 +12,6 @@
   "engines": {
     "node": ">=18.0.0"
   },
-
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.2",
@@ -23,8 +22,11 @@
     "express-session": "^1.18.1",
     "method-override": "^3.0.0",
     "mongoose": "^8.12.1",
+    "node-cron": "^3.0.3",
     "passport": "^0.7.0",
-    "passport-local": "^1.0.0"
+    "passport-local": "^1.0.0",
+    "qrcode-terminal": "^0.12.0",
+    "whatsapp-web.js": "^1.26.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
