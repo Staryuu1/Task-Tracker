@@ -102,7 +102,7 @@ const checkAndSendReminders = async () => {
         for (const task of tasks) {
             let profile = await Profile.findOne({ user: task.user });
         
-            if (profile && profile.phoneNumber && profile.phoneVerified == true) {
+            if (profile && profile.phoneNumber && profile.phoneVerified == true && task.completed == false) {
                 const message = `🔔 *Pengingat: Deadline Tugas Besok!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nPastikan tugas ini selesai tepat waktu! ✅`;
 
                 await sendWhatsAppMessage(profile.phoneNumber, message);

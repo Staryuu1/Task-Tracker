@@ -22,7 +22,7 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
 ### Fitur yang Akan Ditambahkan:
 - [ ] **Pengingat H-1 Deadline**  
   - [x] Kirim notifikasi kepada pengguna sehari sebelum tugas jatuh tempo.   
-  - [ ] Pastikan notifikasi dikirim hanya untuk tugas yang belum selesai. 
+  - [x] Pastikan notifikasi dikirim hanya untuk tugas yang belum selesai. 
   - [x] Hanya Mengirim ke Nomor yang sudah verifikasi
 - [ ] ** Improve Profile**
   - [x] Bisa mengedit nama dan nomor hp
