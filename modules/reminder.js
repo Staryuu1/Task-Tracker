@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require("fs");
 const { Client, LocalAuth } = require('whatsapp-web.js');
-const qrcode = require('qrcode-terminal');
+const qrcode = require('qrcode');
 const cron = require('node-cron');
 const mongoose = require('mongoose');
 const Task = require('../models/Task'); // Sesuaikan dengan model Task
