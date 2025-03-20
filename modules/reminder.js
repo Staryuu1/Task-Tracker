@@ -116,7 +116,7 @@ const checkAndSendReminders = async () => {
 };
 
 // Cron job untuk mengirim pengingat setiap hari jam 06:00
-cron.schedule('0 6 * * *', async () => {
+cron.schedule('30 6 * * *', async () => {
     await checkAndSendReminders();
 });
 
