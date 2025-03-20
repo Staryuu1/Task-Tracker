@@ -3,6 +3,8 @@ const express = require('express');
 const connectDB = require('./config/db');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
+const fs = require("fs");
+const path = require("path");
 const passport = require('passport');
 const methodOverride = require('method-override');
 require('./modules/reminder');
@@ -46,7 +48,12 @@ app.get('/', (req, res) => {
     res.redirect('/tasks');
 });
 app.get('/qrcode', (req, res) => {
-    res.sendFile(__dirname + '/modules/public/qr.png');
+    const filePath = path.join(__dirname, 'modules', 'public', 'qr.png');
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send('QR code not found');
+    }
 });
 // Global error-handling middleware
 app.use((err, req, res, next) => {

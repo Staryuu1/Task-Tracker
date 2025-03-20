@@ -27,8 +27,19 @@ client.on("qr", async (qr) => {
 // Konfirmasi jika bot sudah siap digunakan
 client.on('ready', () => {
     console.log('WhatsApp Bot siap digunakan!');
+    const qrPath = path.join(__dirname, "public", "qr.png");
 
-    // Jalankan manual untuk testing (hapus ini setelah testing)
+    // Hapus QR Code jika ada
+    if (fs.existsSync(qrPath)) {
+        fs.unlink(qrPath, (err) => {
+            if (err) {
+                console.error("Gagal menghapus QR Code:", err);
+            } else {
+                console.log("QR Code dihapus setelah bot siap.");
+            }
+        });
+    }
+    
     checkAndSendReminders();
 });
 
@@ -79,7 +90,7 @@ const checkAndSendReminders = async () => {
             let profile = await Profile.findOne({ user: task.user });
         
             if (profile && profile.phoneNumber) {
-                const message = `🔔 *Pengingat: Tugas Kamu Jatuh Tempo Besok!* 🔔\n\n📌 *${task.title}*\n📅 ${task.dueDate.toDateString()}\n📝 ${task.description}\n\nSegera selesaikan tugas ini! ✅`;
+                const message = `🔔 *Pengingat: Tugas Kamu Deadline Besok!* 🔔\n\n📌 Nama tugas: *${task.title}*\n📅Tanggal: ${task.dueDate.toDateString()}\n📝Deskripsi: ${task.description}\n\nSegera selesaikan tugas ini! ✅`;
                 await sendWhatsAppMessage(profile.phoneNumber, message);
             }
         }
