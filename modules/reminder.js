@@ -106,5 +106,5 @@ cron.schedule('0 6 * * *', async () => {
     await checkAndSendReminders();
 });
 
-// Jalankan WhatsApp Client
-client.initialize();
+module.exports = { client, sendWhatsAppMessage };
+

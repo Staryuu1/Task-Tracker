@@ -33,3 +33,4 @@ build/
 
 .wwebjs_auth/
 .wwebjs_cache
+modules/public/qr.png
