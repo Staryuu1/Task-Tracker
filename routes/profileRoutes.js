@@ -4,6 +4,7 @@ const Profile = require("../models/Profile");
 const { ensureAuthenticated } = require("../middleware/authMiddleware");
 const {sendWhatsAppMessage} =require('../modules/reminder');
 const router = express.Router();
+require('dotenv').config();
 
 
 router.get("/", ensureAuthenticated, async (req, res) => {
@@ -85,8 +86,9 @@ router.post("/edit-phone/:id", ensureAuthenticated, async (req, res) => {
         if (!profile) {
             return res.status(404).json({ error: "Profile not found" });
         }
-        const baseUrl = "localhost:3000/profile/verify-phone/";
-        const message = `📲 Silakan klik link berikut untuk verifikasi akun Anda: ${baseUrl}${req.user.id}`;
+        const baseUrl =  `${process.env.BASE_URL}/profile/verify-phone/`;
+        const message = `👋 Hey ${req.user.username}!\n\nKamu hampir selesai! Klik link di bawah ini untuk verifikasi akun kamu:\n\n🔗 ${baseUrl}${req.user.id}\n\nKalau ini bukan kamu, cukup abaikan pesan ini. 😉`;
+
 
         await sendWhatsAppMessage(Number, message);
         res.status(200).json({ message: "Phone Number updated successfully", profile });
@@ -94,6 +96,34 @@ router.post("/edit-phone/:id", ensureAuthenticated, async (req, res) => {
         console.error("Server error:", err);
         console.log(err)
         res.status(500).json({ error: "Error updating Phone Number" });
+    }
+});
+
+router.post("/edit-name/:id", ensureAuthenticated, async (req, res) => {
+
+
+    try {
+        const { Name } = req.body;
+
+        if (!Number ) {
+            return res.status(400).json({ error: "All fields are required" });
+        }
+
+        const profile = await Profile.findOneAndUpdate(
+            { _id: req.params.id, user: req.user.id },
+            { name: Name},
+            { new: true }
+        );
+
+        if (!profile) {
+            return res.status(404).json({ error: "Profile not found" });
+        }
+        
+        res.status(200).json({ message: "Name updated successfully", profile });
+    } catch (err) {
+        console.error("Server error:", err);
+        console.log(err)
+        res.status(500).json({ error: "Error updating Name" });
     }
 });
 module.exports = router;

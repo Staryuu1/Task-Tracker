@@ -33,16 +33,13 @@
 
                     <div class="flex justify-between items-center">
                         <p><strong>Full Name:</strong> <%= profile.name %></p>
-                        <button class="text-gray-500 hover:text-black">
+                        <button class="text-gray-500 hover:text-black edit-name" data-id="<%= profile._id %>">
                             <i class="fas fa-edit"></i>
                         </button>
                     </div>
 
                     <div class="flex justify-between items-center">
                         <p><strong>Email:</strong> <%= user.email %></p>
-                        <button class="text-gray-500 hover:text-black">
-                            <i class="fas fa-edit"></i>
-                        </button>
                     </div>
 
                     <div class="flex justify-between items-center">
@@ -135,6 +132,75 @@
                         icon: "error",
                         title: "Error",
                         text: error.message || "Failed to update Phone Number",
+                        });
+                    });
+                    }
+                });
+                } catch (error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: error.message || "Failed to fetch Phone Number",
+                });
+                }
+            });
+        });
+
+        document.querySelectorAll(".edit-name").forEach((button) => {
+            button.addEventListener("click", async function() {
+                const profileId = this.getAttribute("data-id");
+
+                try {
+                const response = await fetch(`/profile/get/${profileId}`, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch task");
+                }
+
+                const profile = await response.json();
+
+                Swal.fire({
+                    title: "Edit Full Name",
+                    html: `
+                    <input type="text" id="full-Name" class="swal2-input" placeholder="Full-Name" value="${profile.name}">
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: "Save",
+                    preConfirm: () => {
+                    const Name = document.getElementById("full-Name").value.trim();
+                   
+
+                    if (!Name ) {
+                        Swal.showValidationMessage("Please enter all fields");
+                        return false;
+                    }
+
+                    return { Name};
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                    fetch(`/profile/edit-name/${profileId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(result.value),
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.error) throw new Error(data.error);
+                        Swal.fire({
+                        icon: "success",
+                        title: "Success",
+                        text: "Name updated successfully",
+                        }).then(() => location.reload());
+                    })
+                    .catch((error) => {
+                        Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: error.message || "Failed to update Name",
                         });
                     });
                     }

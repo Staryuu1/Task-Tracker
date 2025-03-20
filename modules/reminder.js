@@ -89,8 +89,9 @@ const checkAndSendReminders = async () => {
         for (const task of tasks) {
             let profile = await Profile.findOne({ user: task.user });
         
-            if (profile && profile.phoneNumber) {
-                const message = `🔔 *Pengingat: Tugas Kamu Deadline Besok!* 🔔\n\n📌 Nama tugas: *${task.title}*\n📅Tanggal: ${task.dueDate.toDateString()}\n📝Deskripsi: ${task.description}\n\nSegera selesaikan tugas ini! ✅`;
+            if (profile && profile.phoneNumber && profile.phoneVerified == true) {
+                const message = `🔔 *Pengingat: Deadline Tugas Besok!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nPastikan tugas ini selesai tepat waktu! ✅`;
+
                 await sendWhatsAppMessage(profile.phoneNumber, message);
             }
         }
@@ -101,7 +102,7 @@ const checkAndSendReminders = async () => {
     }
 };
 
-// Cron job untuk mengirim pengingat setiap hari jam 08:00
+// Cron job untuk mengirim pengingat setiap hari jam 06:00
 cron.schedule('0 6 * * *', async () => {
     await checkAndSendReminders();
 });

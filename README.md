@@ -18,6 +18,16 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
 - **Frontend:** EJS, Tailwind CSS
 - **Autentikasi:** Passport.js, Bcrypt
 
+## 📝 To-Do List
+### Fitur yang Akan Ditambahkan:
+- [ ] **Pengingat H-1 Deadline**  
+  - [ ] Kirim notifikasi kepada pengguna sehari sebelum tugas jatuh tempo.   
+  - [ ] Pastikan notifikasi dikirim hanya untuk tugas yang belum selesai. 
+  - [ ] Hanya Mengirim ke Nomor yang sudah verifikasi
+- [ ] ** Improve Profile**
+  - [ ] Bisa mengedit nama dan nomor hp
+  - [ ] Mengirim verifikasi saat mengedit nomor hp
+  - [ ] Mengedit email dan verifikasi (Opsional)
 ## ⚡ Instalasi dan Menjalankan Proyek
 1. **Clone Repository**
    ```sh
