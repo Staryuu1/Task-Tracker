@@ -98,7 +98,7 @@ const checkAndSendReminders = async () => {
         ));
         today.setHours(7, 0, 0, 0);
     
-         const reminderDays = [4, 3, 2, 1]; 
+        const reminderDays = [4, 3, 2, 1]; // Kirim pengingat untuk H-4, H-3, H-2, H-1
     
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
@@ -108,7 +108,7 @@ const checkAndSendReminders = async () => {
         
             const nextDay = new Date(reminderDate);
             nextDay.setDate(reminderDate.getDate() + 1);
-            nextDay.seours(7, 0, 0, 0);
+            nextDay.seHours(7, 0, 0, 0);
     
     
             const tasks = await Task.find({
