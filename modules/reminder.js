@@ -137,11 +137,11 @@ const checkAndSendReminders = async () => {
     
 };
 
-cron.schedule('* * * * *', async () => {
+cron.schedule('0 6 * * *', async () => {
     const now = new Date();
     console.log(`⏰ Cron job dijalankan pada: ${now.toString()}`);
 
-    // await checkAndSendReminders();
+    await checkAndSendReminders();
 });
 
 module.exports = { client, sendWhatsAppMessage };
