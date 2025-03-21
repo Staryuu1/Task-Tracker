@@ -121,7 +121,7 @@ const checkAndSendReminders = async () => {
     
                 if (profile && profile.phoneNumber && profile.phoneVerified) {
     
-                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
+                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
     
                     await sendWhatsAppMessage(profile.phoneNumber, message);
                 }
@@ -137,7 +137,7 @@ const checkAndSendReminders = async () => {
     
 };
 
-cron.schedule('0 11 * * *', async () => {
+cron.schedule('0 12 * * *', async () => {
     await checkAndSendReminders();
 }, {
     scheduled: true,
