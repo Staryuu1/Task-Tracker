@@ -106,8 +106,10 @@ const checkAndSendReminders = async () => {
             const nextDay = new Date(reminderDate);
             nextDay.setDate(reminderDate.getDate() + 1);
             nextDay.setHours(7, 0, 0, 0);
-            console.log(today.toDateString());
 
+            console.log(today.toDateString());
+            console.log(reminderDate.toDateString());
+            console.log(nextDay.toDateString());
             const tasks = await Task.find({
                 dueDate: { $gte: reminderDate, $lt: nextDay },
                 completed: false
