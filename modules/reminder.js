@@ -106,15 +106,13 @@ const checkAndSendReminders = async () => {
             const nextDay = new Date(reminderDate);
             nextDay.setDate(reminderDate.getDate() + 1);
             nextDay.setHours(7, 0, 0, 0);
-            
-            console.log(`🔎 Mencari tugas dengan deadline pada ${reminderDate.toISOString()} hingga ${nextDay.toISOString()}`);
+            console.log(today.toDateString());
 
             const tasks = await Task.find({
                 dueDate: { $gte: reminderDate, $lt: nextDay },
                 completed: false
             });
 
-            console.log(`📋 Ditemukan ${tasks.length} tugas untuk dikirim pengingat (deadline dalam ${daysBefore} hari)`);
 
             for (const task of tasks) {
                 let profile = await Profile.findOne({ user: task.user });
@@ -122,7 +120,6 @@ const checkAndSendReminders = async () => {
                 if (profile && profile.phoneNumber && profile.phoneVerified) {
                     const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
 
-                    console.log(`📨 Mengirim pesan ke ${profile.phoneNumber} untuk tugas: ${task.title}`);
                     
                     await sendWhatsAppMessage(profile.phoneNumber, message);
                 } else {
