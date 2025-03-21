@@ -97,12 +97,10 @@ const checkAndSendReminders = async () => {
             new Date().getUTCDate()
         ));
         today.setUTCHours(0, 0, 0, 0);
-        console.log("⏳ Today (UTC):", today.toISOString());
     
         const reminderDays = [4, 3, 2, 1]; // Kirim pengingat untuk H-4, H-3, H-2, H-1
     
         for (const daysBefore of reminderDays) {
-            // Buat reminderDate yang tetap dalam UTC
             const reminderDate = new Date(today);
             reminderDate.setUTCDate(today.getUTCDate() + daysBefore);
             reminderDate.setUTCHours(0, 0, 0, 0);
@@ -112,9 +110,7 @@ const checkAndSendReminders = async () => {
             nextDay.setUTCDate(reminderDate.getUTCDate() + 1);
             nextDay.setUTCHours(0, 0, 0, 0);
     
-            console.log(`🔍 Mencari tugas dengan dueDate antara ${reminderDate.toISOString()} dan ${nextDay.toISOString()}`);
     
-            // Cari tugas yang memiliki dueDate sesuai rentang
             const tasks = await Task.find({
                 dueDate: { $gte: reminderDate, $lt: nextDay },
                 completed: false
@@ -124,10 +120,8 @@ const checkAndSendReminders = async () => {
                 let profile = await Profile.findOne({ user: task.user });
     
                 if (profile && profile.phoneNumber && profile.phoneVerified) {
-                    console.log(`📅 Tugas ditemukan: ${task.title}`);
-                    console.log(`🕒 Due Date dari Database (UTC): ${task.dueDate.toISOString()}`);
     
-                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toUTCString()}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
+                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
     
                     await sendWhatsAppMessage(profile.phoneNumber, message);
                 }
@@ -143,9 +137,11 @@ const checkAndSendReminders = async () => {
     
 };
 
-// Cron job untuk mengirim pengingat setiap hari jam 06:00
-cron.schedule('0 7 * * *', async () => {
+cron.schedule('0 11 * * *', async () => {
     await checkAndSendReminders();
+}, {
+    scheduled: true,
+    timezone: "UTC"
 });
 
 module.exports = { client, sendWhatsAppMessage };
