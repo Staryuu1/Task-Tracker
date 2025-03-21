@@ -90,24 +90,25 @@ const checkAndSendReminders = async () => {
     console.log('🔍 Mengecek tugas yang jatuh tempo...');
 
     try {
+        const now = new Date();
         const today = new Date(Date.UTC(
-            new Date().getUTCFullYear(),
-            new Date().getUTCMonth(),
-            new Date().getUTCDate()
+            now.getUTCFullYear(),
+            now.getUTCMonth(),
+            now.getUTCDate()
         ));
-        today.setUTCHours(0, 0, 0, 0);
+        today.setHours(7, 0, 0, 0); // WIB (UTC+7)
     
-        const reminderDays = [4, 3, 2, 1]; 
+        const reminderDays = [4, 3, 2, 1];
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
-            reminderDate.setUTCDate(today.getUTCDate() + daysBefore);
-            reminderDate.setUTCHours(0, 0, 0, 0); // Start dari awal hari
+            reminderDate.setDate(today.getDate() + daysBefore);
+            reminderDate.setHours(7, 0, 0, 0); // WIB (UTC+7)
     
             const nextDay = new Date(reminderDate);
-            nextDay.setUTCDate(reminderDate.getUTCDate() + 1);
-            nextDay.setUTCHours(0, 0, 0, 0); // Akhir hari
+            nextDay.setDate(reminderDate.getDate() + 1);
+            nextDay.setHours(7, 0, 0, 0); // WIB (UTC+7)
     
-            console.log(`🔎 Mencari tugas antara ${reminderDate.toISOString()} - ${nextDay.toISOString()}`);
+            console.log(`🔎 Mencari tugas antara ${reminderDate.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} - ${nextDay.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`);
     
             const tasks = await Task.find({
                 dueDate: { $gte: reminderDate, $lt: nextDay },
@@ -115,19 +116,33 @@ const checkAndSendReminders = async () => {
             });
     
             console.log(`📋 Ditemukan ${tasks.length} tugas.`);
-            tasks.forEach((task) => {
-                console.log(`📝 ${task.title} - Deadline: ${task.dueDate.toISOString()}`);
-            });
+            
+            // **Mengelompokkan tugas berdasarkan user**
+            const tasksByUser = {};
     
             for (const task of tasks) {
-                let profile = await Profile.findOne({ user: task.user });
+                if (!tasksByUser[task.user]) {
+                    tasksByUser[task.user] = [];
+                }
+                tasksByUser[task.user].push(task);
+            }
     
-                if (profile && profile.phoneNumber && profile.phoneVerified && task.completed == false) {
-                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
+            for (const [userId, userTasks] of Object.entries(tasksByUser)) {
+                let profile = await Profile.findOne({ user: userId });
+    
+                if (profile && profile.phoneNumber && profile.phoneVerified) {
+                    let message = `🔔 *Pengingat: Kamu memiliki ${userTasks.length} tugas dengan deadline dalam ${daysBefore} hari!* 🔔\n\n`;
+    
+                    userTasks.forEach((task, index) => {
+                        message += `📌 *${index + 1}. ${task.title}*\n📅 *Deadline:* ${task.dueDate.toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' })}\n📝 *Deskripsi:* ${task.description}\n\n`;
+                    });
+    
+                    message += `🚀 Segera selesaikan tugas-tugas ini agar tidak terlambat! ✅`;
     
                     await sendWhatsAppMessage(profile.phoneNumber, message);
+                    console.log(`📨 Mengirim pesan ke ${profile.phoneNumber} (${userTasks.length} tugas)`);
                 } else {
-                    console.log(`⚠️ Tugas "${task.title}" tidak memiliki nomor telepon terverifikasi.`);
+                    console.log(`⚠️ User ${userId} tidak memiliki nomor telepon terverifikasi.`);
                 }
             }
     
@@ -136,6 +151,7 @@ const checkAndSendReminders = async () => {
     } catch (error) {
         console.error('❌ Gagal mengecek tugas:', error);
     }
+    
     
 };
 
