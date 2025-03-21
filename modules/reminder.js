@@ -98,7 +98,7 @@ const checkAndSendReminders = async () => {
         ));
         today.setHours(7, 0, 0, 0);
     
-        const reminderDays = [4, 3, 2, 1]; // Kirim pengingat untuk H-4, H-3, H-2, H-1
+         const reminderDays = [4, 3, 2, 1]; 
     
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
@@ -139,7 +139,7 @@ const checkAndSendReminders = async () => {
 
 const cron = require('node-cron');
 
-cron.schedule('0 13 * * *', async () => {
+cron.schedule('0 6 * * *', async () => {
 
     await checkAndSendReminders();
 }, {
