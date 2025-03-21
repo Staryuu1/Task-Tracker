@@ -108,7 +108,7 @@ const checkAndSendReminders = async () => {
         
             const nextDay = new Date(reminderDate);
             nextDay.setDate(reminderDate.getDate() + 1);
-            nextDay.seHours(7, 0, 0, 0);
+            nextDay.setHours(7, 0, 0, 0);
     
     
             const tasks = await Task.find({
