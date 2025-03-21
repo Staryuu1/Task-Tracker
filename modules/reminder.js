@@ -96,19 +96,19 @@ const checkAndSendReminders = async () => {
             new Date().getUTCMonth(),
             new Date().getUTCDate()
         ));
-        today.setUTCHours(0, 0, 0, 0);
+        today.setHours(7, 0, 0, 0);
     
         const reminderDays = [4, 3, 2, 1]; // Kirim pengingat untuk H-4, H-3, H-2, H-1
     
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
-            reminderDate.setUTCDate(today.getUTCDate() + daysBefore);
-            reminderDate.setUTCHours(0, 0, 0, 0);
+            reminderDate.setDate(today.getDate() + daysBefore);
+            reminderDate.setHours(7, 0, 0, 0);
     
         
             const nextDay = new Date(reminderDate);
-            nextDay.setUTCDate(reminderDate.getUTCDate() + 1);
-            nextDay.setUTCHours(0, 0, 0, 0);
+            nextDay.setDate(reminderDate.getDate() + 1);
+            nextDay.seours(7, 0, 0, 0);
     
     
             const tasks = await Task.find({
@@ -137,12 +137,16 @@ const checkAndSendReminders = async () => {
     
 };
 
-cron.schedule('0 6 * * *', async () => {
-    const now = new Date();
-    console.log(`⏰ Cron job dijalankan pada: ${now.toString()}`);
+const cron = require('node-cron');
+
+cron.schedule('0 13 * * *', async () => {
 
     await checkAndSendReminders();
+}, {
+    scheduled: true,
+    timezone: "Asia/Jakarta" 
 });
+
 
 module.exports = { client, sendWhatsAppMessage };
 
