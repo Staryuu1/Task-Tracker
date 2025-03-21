@@ -90,19 +90,31 @@ const checkAndSendReminders = async () => {
     console.log('🔍 Mengecek tugas yang jatuh tempo besok...');
 
     try {
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0); // Reset jam ke UTC 00:00:00
-        
-        const reminderDays = [4, 3, 2, 1]; 
+        // Pastikan today benar-benar dalam UTC
+        const today = new Date(Date.UTC(
+            new Date().getUTCFullYear(),
+            new Date().getUTCMonth(),
+            new Date().getUTCDate()
+        ));
+        today.setUTCHours(0, 0, 0, 0);
+        console.log("⏳ Today (UTC):", today.toISOString());
+    
+        const reminderDays = [4, 3, 2, 1]; // Kirim pengingat untuk H-4, H-3, H-2, H-1
     
         for (const daysBefore of reminderDays) {
+            // Buat reminderDate yang tetap dalam UTC
             const reminderDate = new Date(today);
-            reminderDate.setUTCDate(today.getUTCDate() + daysBefore);  
+            reminderDate.setUTCDate(today.getUTCDate() + daysBefore);
+            reminderDate.setUTCHours(0, 0, 0, 0);
     
+        
             const nextDay = new Date(reminderDate);
-            nextDay.setUTCDate(reminderDate.getUTCDate() + 1); 
+            nextDay.setUTCDate(reminderDate.getUTCDate() + 1);
+            nextDay.setUTCHours(0, 0, 0, 0);
     
-           
+            console.log(`🔍 Mencari tugas dengan dueDate antara ${reminderDate.toISOString()} dan ${nextDay.toISOString()}`);
+    
+            // Cari tugas yang memiliki dueDate sesuai rentang
             const tasks = await Task.find({
                 dueDate: { $gte: reminderDate, $lt: nextDay },
                 completed: false
@@ -112,10 +124,10 @@ const checkAndSendReminders = async () => {
                 let profile = await Profile.findOne({ user: task.user });
     
                 if (profile && profile.phoneNumber && profile.phoneVerified) {
-                   
-                    const formattedDueDate = new Date(task.dueDate).toUTCString(); 
+                    console.log(`📅 Tugas ditemukan: ${task.title}`);
+                    console.log(`🕒 Due Date dari Database (UTC): ${task.dueDate.toISOString()}`);
     
-                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${formattedDueDate}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
+                    const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toUTCString()}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
     
                     await sendWhatsAppMessage(profile.phoneNumber, message);
                 }
@@ -126,6 +138,7 @@ const checkAndSendReminders = async () => {
     } catch (error) {
         console.error('❌ Gagal mengecek tugas:', error);
     }
+    
     
     
 };
