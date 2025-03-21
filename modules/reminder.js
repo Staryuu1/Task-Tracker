@@ -95,45 +95,48 @@ const checkAndSendReminders = async () => {
             new Date().getUTCMonth(),
             new Date().getUTCDate()
         ));
-        today.setHours(7, 0, 0, 0);
+        today.setUTCHours(0, 0, 0, 0);
     
         const reminderDays = [4, 3, 2, 1]; 
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
-            reminderDate.setDate(today.getDate() + daysBefore);
-            reminderDate.setHours(7, 0, 0, 0);
+            reminderDate.setUTCDate(today.getUTCDate() + daysBefore);
+            reminderDate.setUTCHours(0, 0, 0, 0); // Start dari awal hari
     
             const nextDay = new Date(reminderDate);
-            nextDay.setDate(reminderDate.getDate() + 1);
-            nextDay.setHours(7, 0, 0, 0);
-
-            console.log(today.toDateString());
-            console.log(reminderDate.toDateString());
-            console.log(nextDay.toDateString());
+            nextDay.setUTCDate(reminderDate.getUTCDate() + 1);
+            nextDay.setUTCHours(0, 0, 0, 0); // Akhir hari
+    
+            console.log(`🔎 Mencari tugas antara ${reminderDate.toISOString()} - ${nextDay.toISOString()}`);
+    
             const tasks = await Task.find({
                 dueDate: { $gte: reminderDate, $lt: nextDay },
                 completed: false
             });
-
-
+    
+            console.log(`📋 Ditemukan ${tasks.length} tugas.`);
+            tasks.forEach((task) => {
+                console.log(`📝 ${task.title} - Deadline: ${task.dueDate.toISOString()}`);
+            });
+    
             for (const task of tasks) {
                 let profile = await Profile.findOne({ user: task.user });
-
-                if (profile && profile.phoneNumber && profile.phoneVerified) {
+    
+                if (profile && profile.phoneNumber && profile.phoneVerified && task.completed == false) {
                     const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
-
-                    
+    
                     await sendWhatsAppMessage(profile.phoneNumber, message);
                 } else {
                     console.log(`⚠️ Tugas "${task.title}" tidak memiliki nomor telepon terverifikasi.`);
                 }
             }
-
+    
             console.log(`✅ Pengingat selesai dikirim untuk tugas yang deadline dalam ${daysBefore} hari.`);
         }
     } catch (error) {
         console.error('❌ Gagal mengecek tugas:', error);
     }
+    
 };
 
 
