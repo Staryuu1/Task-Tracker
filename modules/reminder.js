@@ -87,10 +87,9 @@ const sendWhatsAppMessage = async (phoneNumber, message) => {
 
 // Fungsi untuk mengecek tugas yang jatuh tempo besok
 const checkAndSendReminders = async () => {
-    console.log('🔍 Mengecek tugas yang jatuh tempo besok...');
+    console.log('🔍 Mengecek tugas yang jatuh tempo...');
 
     try {
-        // Pastikan today benar-benar dalam UTC
         const today = new Date(Date.UTC(
             new Date().getUTCFullYear(),
             new Date().getUTCMonth(),
@@ -98,44 +97,46 @@ const checkAndSendReminders = async () => {
         ));
         today.setHours(7, 0, 0, 0);
     
-        const reminderDays = [4, 3, 2, 1]; // Kirim pengingat untuk H-4, H-3, H-2, H-1
-    
+        const reminderDays = [4, 3, 2, 1]; 
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
             reminderDate.setDate(today.getDate() + daysBefore);
             reminderDate.setHours(7, 0, 0, 0);
     
-        
             const nextDay = new Date(reminderDate);
             nextDay.setDate(reminderDate.getDate() + 1);
             nextDay.setHours(7, 0, 0, 0);
-    
-    
+            
+            console.log(`🔎 Mencari tugas dengan deadline pada ${reminderDate.toISOString()} hingga ${nextDay.toISOString()}`);
+
             const tasks = await Task.find({
                 dueDate: { $gte: reminderDate, $lt: nextDay },
                 completed: false
             });
-    
+
+            console.log(`📋 Ditemukan ${tasks.length} tugas untuk dikirim pengingat (deadline dalam ${daysBefore} hari)`);
+
             for (const task of tasks) {
                 let profile = await Profile.findOne({ user: task.user });
-    
+
                 if (profile && profile.phoneNumber && profile.phoneVerified) {
-    
                     const message = `🔔 *Pengingat: Deadline Tugas dalam ${daysBefore} hari!* 🔔\n\n📌 *Nama Tugas:* ${task.title}\n📅 *Batas Waktu:* ${task.dueDate.toDateString()}\n📝 *Deskripsi:* ${task.description}\n\nJangan lupa untuk menyelesaikan tugas tepat waktu! ✅`;
-    
+
+                    console.log(`📨 Mengirim pesan ke ${profile.phoneNumber} untuk tugas: ${task.title}`);
+                    
                     await sendWhatsAppMessage(profile.phoneNumber, message);
+                } else {
+                    console.log(`⚠️ Tugas "${task.title}" tidak memiliki nomor telepon terverifikasi.`);
                 }
             }
-    
-            console.log(`📢 Pengingat dikirim untuk ${tasks.length} tugas yang deadline dalam ${daysBefore} hari.`);
+
+            console.log(`✅ Pengingat selesai dikirim untuk tugas yang deadline dalam ${daysBefore} hari.`);
         }
     } catch (error) {
         console.error('❌ Gagal mengecek tugas:', error);
     }
-    
-    
-    
 };
+
 
 cron.schedule('0 6 * * *', async () => {
 
