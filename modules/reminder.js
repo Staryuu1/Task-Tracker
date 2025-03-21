@@ -137,8 +137,6 @@ const checkAndSendReminders = async () => {
     
 };
 
-const cron = require('node-cron');
-
 cron.schedule('0 6 * * *', async () => {
 
     await checkAndSendReminders();
