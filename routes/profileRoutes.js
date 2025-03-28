@@ -2,7 +2,8 @@ const express = require("express");
 const User = require('../models/User');
 const Profile = require("../models/Profile");
 const { ensureAuthenticated } = require("../middleware/authMiddleware");
-const {sendWhatsAppMessage} =require('../modules/reminder');
+const {sendWhatsAppMessage} = require('../modules/reminder');
+const jwt = require('jsonwebtoken');
 const router = express.Router();
 require('dotenv').config();
 
@@ -31,7 +32,8 @@ router.get("/", ensureAuthenticated, async (req, res) => {
 router.get("/verify-phone/:token", async (req, res) => {
     try {
         const { token } = req.params;
-        const profile =  await Profile.findOne({ user: token })
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const profile = await Profile.findOne({ user: decoded.userId });
         
         if (!profile) {
             return res.status(404).json({ message: "Profile not found" });
@@ -86,8 +88,9 @@ router.post("/edit-phone/:id", ensureAuthenticated, async (req, res) => {
         if (!profile) {
             return res.status(404).json({ error: "Profile not found" });
         }
-        const baseUrl =  `${process.env.BASE_URL}/profile/verify-phone/`;
-        const message = `👋 Hey ${req.user.username}!\n\nKamu hampir selesai! Klik link di bawah ini untuk verifikasi akun kamu:\n\n🔗 ${baseUrl}${req.user.id}\n\nKalau ini bukan kamu, cukup abaikan pesan ini. 😉`;
+        const baseUrl = `${process.env.BASE_URL}/profile/verify-phone/`;
+        const token = jwt.sign({ userId: req.user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const message = `👋 Hey ${req.user.username}!\n\nKamu hampir selesai! Klik link di bawah ini untuk verifikasi akun kamu:\n\n🔗 ${baseUrl}${token}\n\nKalau ini bukan kamu, cukup abaikan pesan ini. 😉`;
 
 
         await sendWhatsAppMessage(Number, message);
