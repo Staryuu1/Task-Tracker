@@ -96,17 +96,17 @@ const checkAndSendReminders = async () => {
             now.getUTCMonth(),
             now.getUTCDate()
         ));
-        today.setHours(0, 0, 0, 0); // WIB (UTC+7)
+        today.setHours(0, 0, 0, 0); 
     
         const reminderDays = [4, 3, 2, 1];
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
             reminderDate.setDate(today.getDate() + daysBefore);
-            reminderDate.setHours(0, 0, 0, 0); // WIB (UTC+7)
+            reminderDate.setHours(0, 0, 0, 0); 
     
             const nextDay = new Date(reminderDate);
             nextDay.setDate(reminderDate.getDate() + 1);
-            nextDay.setHours(0, 0, 0, 0); // WIB (UTC+7)
+            nextDay.setHours(0, 0, 0, 0); 
     
             console.log(`🔎 Mencari tugas antara ${reminderDate.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} - ${nextDay.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`);
     
