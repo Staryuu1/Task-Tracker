@@ -4,16 +4,16 @@ const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode');
 const cron = require('node-cron');
 const mongoose = require('mongoose');
-const Task = require('../models/Task'); // Sesuaikan dengan model Task
+const Task = require('../models/Task'); 
 const Profile = require("../models/Profile");
 const path = require("path");
 
-// Inisialisasi WhatsApp Client dengan session yang tersimpan
+
 const client = new Client({
     authStrategy: new LocalAuth()
 });
 
-// Tampilkan QR Code untuk login pertama kali
+
 client.on("qr", async (qr) => {
     console.log("QR Code baru dibuat, menyimpannya sebagai gambar...");
     
@@ -37,12 +37,12 @@ client.on("qr", async (qr) => {
     console.log("QR Code disimpan, akses di: /public/qr.png");
 });
 
-// Konfirmasi jika bot sudah siap digunakan
+
 client.on('ready', () => {
     console.log('WhatsApp Bot siap digunakan!');
     const qrPath = path.join(__dirname, "public", "qr.png");
 
-    // Hapus QR Code jika ada
+   
     if (fs.existsSync(qrPath)) {
         fs.unlink(qrPath, (err) => {
             if (err) {
@@ -56,12 +56,12 @@ client.on('ready', () => {
     checkAndSendReminders();
 });
 
-// Koneksi ke MongoDB
+
 mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('MongoDB Connection Error:', err));
 
-// Fungsi untuk mengirim pesan WhatsApp
+
 const sendWhatsAppMessage = async (phoneNumber, message) => {
     try {
         
@@ -72,11 +72,11 @@ const sendWhatsAppMessage = async (phoneNumber, message) => {
             return;
         }
         if (formattedNumber.startsWith("0")) {
-            formattedNumber = "62" + formattedNumber.slice(1); // Ganti "0" dengan "62"
+            formattedNumber = "62" + formattedNumber.slice(1); 
         } else if (!formattedNumber.startsWith("62")) {
             throw new Error("Nomor tidak valid. Harus diawali dengan '0' atau '62'.");
         }
-        formattedNumber += "@c.us"; // Format untuk WhatsApp Web
+        formattedNumber += "@c.us"; 
 
         await client.sendMessage(formattedNumber, message);
         console.log(`Pesan dikirim ke ${formattedNumber}`);
@@ -85,7 +85,7 @@ const sendWhatsAppMessage = async (phoneNumber, message) => {
     }
 };
 
-// Fungsi untuk mengecek tugas yang jatuh tempo besok
+
 const checkAndSendReminders = async () => {
     console.log('🔍 Mengecek tugas yang jatuh tempo...');
 

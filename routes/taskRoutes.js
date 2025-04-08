@@ -4,7 +4,7 @@ const Notes = require("../models/Notes");
 const { ensureAuthenticated } = require("../middleware/authMiddleware");
 const router = express.Router();
 
-// ✅ Route: Tampilkan semua task berdasarkan user yang login
+
 router.get("/", ensureAuthenticated, async (req, res) => {
     try {
         const tasks = await Task.find({ user: req.user.id });
@@ -37,12 +37,12 @@ router.get("/get/:id", ensureAuthenticated, async (req, res) => {
 });
 
 
-// ✅ Route: Tambah Task Baru
+
 router.post("/add", ensureAuthenticated, async (req, res) => {
     try {
         const { title, description, dueDate, priority, category } = req.body;
         
-        // Validate all fields
+       
         if (!title || !description || !dueDate || !priority || !category) {
             return res.status(400).json({ error: "All fields are required" });
         }
@@ -54,7 +54,7 @@ router.post("/add", ensureAuthenticated, async (req, res) => {
             dueDate,
             priority,
             category,
-            completed: false, // Default false
+            completed: false, 
         });
 
         await newTask.save();
@@ -65,13 +65,13 @@ router.post("/add", ensureAuthenticated, async (req, res) => {
     }
 });
 
-// ✅ Route: Toggle Complete Task
+
 router.post("/complete/:id", ensureAuthenticated, async (req, res) => {
     try {
         const task = await Task.findById(req.params.id);
         if (!task) return res.status(404).send("Task not found");
 
-        task.completed = !task.completed; // Toggle status
+        task.completed = !task.completed; 
         await task.save();
         res.redirect("/tasks");
     } catch (err) {

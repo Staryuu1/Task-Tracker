@@ -42,7 +42,8 @@ router.get("/verify-phone/:token", async (req, res) => {
         profile.phoneVerified = true;
         await profile.save();
         
-        res.json({ message: "Nomor telepon berhasil diverifikasi." });
+        
+        res.render('verification-success');
     } catch (err) {
         console.log(err)
         console.error(err);
