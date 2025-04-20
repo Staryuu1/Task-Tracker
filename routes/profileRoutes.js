@@ -3,6 +3,7 @@ const User = require('../models/User');
 const Profile = require("../models/Profile");
 const { ensureAuthenticated } = require("../middleware/authMiddleware");
 const {sendWhatsAppMessage} = require('../modules/reminder');
+const {sendEmailReminder} = require('../modules/mailer');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 require('dotenv').config();
@@ -128,6 +129,59 @@ router.post("/edit-name/:id", ensureAuthenticated, async (req, res) => {
         console.error("Server error:", err);
         console.log(err)
         res.status(500).json({ error: "Error updating Name" });
+    }
+});
+
+router.post("/edit-email/:id", ensureAuthenticated, async (req, res) => {
+    try {
+        const { Email } = req.body;
+        console.log(req.body)
+        if (!Email) {
+            return res.status(400).json({ error: "Email is required" });
+        }
+
+       
+        const user = await User.findOneAndUpdate(
+            { _id: req.params.id, _id: req.user._id },
+            { email: Email },
+            { new: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        const baseUrl = `${process.env.BASE_URL}/profile/verify-email/`;
+        const token = jwt.sign({ userId: req.user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const message = `👋 Hey ${req.user.username}!\n\nKamu hampir selesai! Klik link di bawah ini untuk verifikasi akun kamu:\n\n🔗 ${baseUrl}${token}\n\nKalau ini bukan kamu, cukup abaikan pesan ini. 😉`;
+        let htmlContent = `</ul><p>🚀 Please complete these tasks on time!</p>`;
+        
+        sendEmailReminder(user.email, "Email Verifications", message);
+        res.status(200).json({ message: "Email updated successfully", user });
+    } catch (err) {
+        console.error("Server error:", err);
+        res.status(500).json({ error: "Error updating email" });
+    }
+});
+router.get("/verify-email/:token", async (req, res) => {
+    try {
+        const { token } = req.params;
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const profile = await Profile.findOne({ user: decoded.userId });
+        
+        if (!profile) {
+            return res.status(404).json({ message: "Profile not found" });
+        }
+        
+        profile.emailVerified = true;
+        await profile.save();
+        
+        
+        res.render('verification-success');
+    } catch (err) {
+        console.log(err)
+        console.error(err);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 });
 module.exports = router;

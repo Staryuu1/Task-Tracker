@@ -1,0 +1,66 @@
+---
+config:
+  layout: fixed
+---
+flowchart TD
+ subgraph Authentication["Authentication"]
+        B("login.ejs")
+        C("register.ejs")
+        D("authRoutes.js")
+  end
+ subgraph Profile["Profile"]
+        G("Profile.ejs")
+        H("profileRoutes.js")
+        I("verification-success.ejs")
+        K("reminder.js")
+        Z("emailer.js")
+  end
+ subgraph Task["Task"]
+        F("Dashboard.ejs")
+        J("taskRoutes.js")
+  end
+ subgraph Database["MongoDB Models"]
+        UM["User.js"]
+        PM["Profile.js"]
+        TM["Task.js"]
+        NM["Notes.js"]
+  end
+    A["User"] -- GET /auth/login --> B
+    A -- GET /auth/register --> C
+    B -- POST /auth/login --> D
+    C -- POST /auth/register --> D
+    D -- Success --> E["GET /tasks"]
+    E -- Renders --> F
+    F -- GET /profile --> G
+    G -- "POST /profile/edit-phone/:id" --> H
+    G -- "POST /profile/edit-name/:id" --> H
+    A -- "GET /profile/verify-phone/:token" --> I
+    H --> K & PM & Z
+    K -- Mengirim --> L["WhatsApp Message"]
+    Z -- Mengirim --> x["Email"]
+    F -- POST /tasks/add --> J
+    F -- POST /tasks/complete/:id --> J
+    F -- POST /tasks/edit/:id --> J
+    F -- POST /tasks/delete/:id --> J
+    F -- POST /tasks/addnotes --> J
+    F -- POST /tasks/deletenotes/:id --> J
+    D --> UM
+    J --> TM & NM
+    style B fill:#ccf,stroke:#333,stroke-width:2px
+    style C fill:#ccf,stroke:#333,stroke-width:2px
+    style D fill:#fcf,stroke:#333,stroke-width:2px
+    style G fill:#ccf,stroke:#333,stroke-width:2px
+    style H fill:#fcf,stroke:#333,stroke-width:2px
+    style I fill:#ccf,stroke:#333,stroke-width:2px
+    style K fill:#fcf,stroke:#333,stroke-width:2px
+    style Z fill:#fcf,stroke:#333,stroke-width:2px
+    style F fill:#ccf,stroke:#333,stroke-width:2px
+    style J fill:#fcf,stroke:#333,stroke-width:2px
+    style UM fill:#fcf,stroke:#333,stroke-width:2px
+    style PM fill:#fcf,stroke:#333,stroke-width:2px
+    style TM fill:#fcf,stroke:#333,stroke-width:2px
+    style NM fill:#fcf,stroke:#333,stroke-width:2px
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style E fill:#cfc,stroke:#333,stroke-width:2px
+    style L fill:#ccf,stroke:#333,stroke-width:2px
+    style x fill:#ccf,stroke:#333,stroke-width:2px

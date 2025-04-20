@@ -5,6 +5,7 @@ const ProfileSchema = new mongoose.Schema({
     name: { type: String, required: true },
     phoneNumber: { type: String, required: true, default: "0" }, 
     phoneVerified:{type: Boolean, default: false},
+    emailVerified:{type: Boolean, default: false},
 });
 
 module.exports = mongoose.model('Profiles', ProfileSchema);

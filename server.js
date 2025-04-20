@@ -7,7 +7,8 @@ const fs = require("fs");
 const path = require("path");
 const passport = require('passport');
 const methodOverride = require('method-override');
-const {client} =require('./modules/reminder');
+const {client} = require('./modules/reminder');
+const {checkAndSendEmailReminders} = require('./modules/mailer');
 require('./config/passport')(passport);
 
 const app = express();
@@ -61,6 +62,6 @@ app.use((err, req, res, next) => {
 });
 
 client.initialize();
-
+checkAndSendEmailReminders()
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
