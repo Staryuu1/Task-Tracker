@@ -25,10 +25,10 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
   - [x] Pastikan notifikasi dikirim hanya untuk tugas yang belum selesai. 
   - [x] Hanya Mengirim ke Nomor yang sudah verifikasi
   - [ ] Testing dan Mencari bug atau Feature yang di perlukan
-- [ ] ** Improve Profile**
+- [x] ** Improve Profile**
   - [x] Bisa mengedit nama dan nomor hp
   - [x] Mengirim verifikasi saat mengedit nomor hp
-  - [ ] Mengedit email dan verifikasi (Opsional)
+  - [x] Mengedit email dan verifikasi (Opsional)
 ## ⚡ Instalasi dan Menjalankan Proyek
 1. **Clone Repository**
    ```sh
