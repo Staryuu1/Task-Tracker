@@ -1,5 +1,6 @@
 const express = require("express");
 const Task = require("../models/Task");
+const Team = require("../models/Team");
 const Notes = require("../models/Notes");
 const { ensureAuthenticated } = require("../middleware/authMiddleware");
 const router = express.Router();
@@ -7,9 +8,18 @@ const router = express.Router();
 
 router.get("/", ensureAuthenticated, async (req, res) => {
     try {
-        const tasks = await Task.find({ user: req.user.id });
+        const userid = req.user.id
+        const Personaltasks = await Task.find({ user: req.user.id });
         const notes = await Notes.find({ user: req.user.id });
-        res.render("Dashboard", { tasks, notes });
+        const Teams = await await Team.find({ members: req.user._id }).populate('tasks');
+        const teamTasks = Teams.flatMap(team => team.tasks);
+        const FindTaskID = await Task.find({_id: teamTasks})
+        let tasks = [...Personaltasks, ...FindTaskID];
+        tasks = tasks.filter((task, index, self) =>
+            index === self.findIndex((t) => t._id.toString() === task._id.toString())
+        );
+        
+        res.render("Dashboard", { tasks, notes,userid });
     } catch (err) {
         console.error(err);
         res.status(500).send("Internal Server Error");
@@ -22,7 +32,8 @@ router.get("/get/:id", ensureAuthenticated, async (req, res) => {
 
     try {
         const task = await Task.findOne({ _id: req.params.id, user: req.user.id });
-
+       
+        
         if (!task) {
             console.log("Task not found:", req.params.id);
             return res.status(404).json({ error: "Task not found" });

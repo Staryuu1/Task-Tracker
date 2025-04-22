@@ -135,7 +135,6 @@ router.post("/edit-name/:id", ensureAuthenticated, async (req, res) => {
 router.post("/edit-email/:id", ensureAuthenticated, async (req, res) => {
     try {
         const { Email } = req.body;
-        console.log(req.body)
         if (!Email) {
             return res.status(400).json({ error: "Email is required" });
         }

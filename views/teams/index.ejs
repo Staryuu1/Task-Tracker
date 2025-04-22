@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tim Saya</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 p-6">
+  <div class="mb-4">
+    <button onclick="window.location.href='/tasks'" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+      ← Kembali
+    </button>
+  </div>
+
+  <div class="container mx-auto">
+    <h2 class="text-xl font-bold mb-4 text-gray-800">👑 Tim yang Saya Pimpin</h2>
+    <div class="bg-white p-4 rounded-lg shadow-md mb-6">
+      <% if (leadTeams.length === 0) { %>
+        <p class="text-gray-600">Tidak ada tim yang kamu pimpin.</p>
+      <% } else { %>
+        <ul class="space-y-4">
+          <% leadTeams.forEach(team => { %>
+            <li class="bg-blue-50 p-4 rounded-lg shadow-sm hover:shadow-lg transition-shadow">
+              <a href="/teams/<%= team._id %>" class="text-blue-500 font-semibold hover:text-blue-700 transition-colors"><%= team.name %></a>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+
+    <!-- Tim yang Diikuti -->
+    <h2 class="text-xl font-bold mb-4 text-gray-800">👥 Tim yang Saya Ikuti</h2>
+    <div class="bg-white p-4 rounded-lg shadow-md">
+      <% if (memberTeams.length === 0) { %>
+        <p class="text-gray-600">Kamu belum tergabung di tim lain.</p>
+      <% } else { %>
+        <ul class="space-y-4">
+          <% memberTeams.forEach(team => { %>
+            <li class="bg-green-50 p-4 rounded-lg shadow-sm hover:shadow-lg transition-shadow">
+              <a href="/teams/<%= team._id %>" class="text-green-500 font-semibold hover:text-green-700 transition-colors"><%= team.name %></a>
+              <span class="text-sm text-gray-500">(Leader: <%= team.leader.name || team.leader.email %>)</span>
+            </li>
+          <% }) %>
+        </ul>
+      <% } %>
+    </div>
+
+    <!-- Form Buat Tim Baru -->
+    <h2 class="text-xl font-bold mt-6 mb-4 text-gray-800">Buat Tim Baru</h2>
+    <form action="/teams/create" method="POST" class="space-y-4">
+      <div>
+        <input type="text" name="name" placeholder="Nama Tim" required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+      </div>
+      <div>
+        <textarea name="description" placeholder="Deskripsi Tim" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+      <button type="submit" class="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Buat</button>
+    </form>
+  </div>
+
+</body>
+<% if (typeof message !== 'undefined' && message) { %>
+    <script>
+        Swal.fire({
+            title: '<%= message.title %>',
+            text: '<%= message.text %>',
+            icon: '<%= message.icon %>',
+            confirmButtonText: 'OK'
+        });
+    </script>
+<% } %>
+
+</html>

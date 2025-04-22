@@ -14,6 +14,9 @@
                 <h1 class="text-2xl font-bold">Task Tracker</h1>
             </div>
             <div class="flex items-center space-x-4">
+              <button  class="bg-black text-white px-4 py-2 rounded" onclick="location.href='/teams'">
+                Teams
+             </button>             
                 <a href="profile" class="text-gray-700 hover:text-black">Profile</a>
                 <a href="auth/Logout" class="text-gray-700 hover:text-black">Logout</a>
             </div>
@@ -98,17 +101,23 @@
                             </p>
                         </div>
                         <div class="flex items-center gap-x-2">
-                            <% if (!task.completed) { %>
-                                <button class="bg-green-500 text-white rounded px-3 py-1 inline-flex items-center complete-task" data-id="<%= task._id %>">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                            <% } %>
-                            <button class="text-gray-500 hover:text-black edit-task" data-id="<%= task._id %>">
-                                <i class="fas fa-edit"></i>
+                          <% if (!task.completed && task.user.equals(userid)) { %>
+                            <button class="bg-green-500 text-white rounded px-3 py-1 inline-flex items-center complete-task" data-id="<%= task._id %>">
+                                <i class="fas fa-check"></i>
                             </button>
-                            <button class="text-gray-500 hover:text-black delete-task" data-id="<%= task._id %>">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                          <% } %>
+                        
+                          <% if (task.user.equals(userid)) { %>
+                              <button class="text-gray-500 hover:text-black edit-task" data-id="<%= task._id %>">
+                                  <i class="fas fa-edit"></i>
+                              </button>
+                              <button class="text-gray-500 hover:text-black delete-task" data-id="<%= task._id %>">
+                                  <i class="fas fa-trash"></i>
+                              </button>
+                          <% } %>
+                          <% if (task.category === 'Team') { %>
+                            <span class="bg-blue-500 text-white rounded px-2 py-1 text-sm">Team Task</span>
+                          <% } %>
                         </div>
                     </div>
                 <% }) %>

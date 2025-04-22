@@ -20,7 +20,7 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
 
 ## 📝 To-Do List
 ### Fitur yang Akan Ditambahkan:
-- [ ] **Pengingat H-1 Deadline**  
+- [x] **Pengingat H-1 Deadline**  
   - [x] Kirim notifikasi kepada pengguna sehari sebelum tugas jatuh tempo.   
   - [x] Pastikan notifikasi dikirim hanya untuk tugas yang belum selesai. 
   - [x] Hanya Mengirim ke Nomor yang sudah verifikasi
@@ -29,6 +29,11 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
   - [x] Bisa mengedit nama dan nomor hp
   - [x] Mengirim verifikasi saat mengedit nomor hp
   - [x] Mengedit email dan verifikasi (Opsional)
+- [ ] ** Team/Collab Task System
+   - [x] Membuat Team dan Mengundang Anggota
+   - [x] Membuat Tugas Team
+   - [ ] Mengirim Reminder jika tugas deadline ke semua member
+   - [ ] Mencari Bug Dan Error
 ## ⚡ Instalasi dan Menjalankan Proyek
 1. **Clone Repository**
    ```sh
@@ -45,6 +50,12 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
    BASE_URL=localhost:3000 (ganti dengan domain/url yang kamu gunakan)
    MONGO_URI=your_mongodb_connection_string
    SESSION_SECRET=your_secret_key
+
+   SMTP_HOST=smtp.gmail.com 
+   SMTP_PORT=465
+   SMTP_SECURE=true
+   SMTP_USER= your_email@gmail.com
+   SMTP_PASS= password
    ```
 4. **Jalankan Server**
    ```sh

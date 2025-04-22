@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Tim</title>
+  <!-- Link ke Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 p-6">
+  <div class="mb-4">
+    <button onclick="window.location.href='/teams'" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+      ← Kembali
+    </button>
+  </div>
+  <div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
+    <!-- Nama Tim -->
+    <h2 class="text-2xl font-bold text-gray-800 mb-4"><%= team.name %></h2>
+    <p class="text-gray-600 mb-4"><%= team.description %></p>
+    <p class="text-gray-800 font-semibold mb-6">Leader: <%= team.leader.username %></p>
+
+    <!-- Anggota Tim -->
+    <h3 class="text-xl font-semibold text-gray-800 mb-4">Anggota</h3>
+    <ul class="space-y-2">
+      <% team.members.forEach(member => { %>
+        <li class="bg-gray-50 p-2 rounded-md shadow-sm hover:bg-gray-100 transition-colors"><%= member.username %></li>
+      <% }) %>
+    </ul>
+
+    <!-- Form Tambah Anggota (Hanya untuk Leader) -->
+    <% if (team.leader._id.toString() === user._id.toString()) { %>
+      <h3 class="text-lg font-semibold text-gray-800 mt-6 mb-2">Tambah Anggota</h3>
+      <form action="/teams/<%= team._id %>/add-member" method="POST" class="space-y-4">
+        <div>
+          <input type="email" name="email" placeholder="Email Pengguna" required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors">Tambah</button>
+      </form>
+    <% } %>  
+
+    <h3 class="text-2xl font-semibold mb-3">📋 Tugas Tim</h3>
+<ul class="list-disc list-inside mb-6 space-y-2">
+  <% team.tasks.forEach(task => { %>
+    <li class="text-gray-800">
+      <strong><%= task.title %></strong> 
+      - <span class="text-gray-600">Priority: <%= task.priority %></span>
+      - <span class="text-gray-500">Due: <%= task.dueDate.toLocaleDateString() %></span>
+      - <span class="text-gray-500">Category: <%= task.category %></span> <!-- Tampilkan kategori -->
+    </li>
+  <% }) %>
+</ul>
+
+
+  <!-- Tambah Tugas (Hanya Leader) -->
+<% if (team.leader._id.toString() === user._id.toString()) { %>
+    <div class="bg-gray-50 border rounded p-4 mb-6">
+      <h3 class="text-lg font-semibold mb-2">Tambah Tugas</h3>
+      <form action="/teams/<%= team._id %>/add-task" method="POST" class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <input type="text" name="title" placeholder="Judul Tugas" required class="flex-1 border px-3 py-2 rounded" />
+        <textarea name="description" placeholder="Deskripsi Tugas" required class="flex-1 border px-3 py-2 rounded mt-2"></textarea>
+        <input type="date" name="dueDate" required class="flex-1 border px-3 py-2 rounded mt-2" />
+        <select name="priority" required class="flex-1 border px-3 py-2 rounded mt-2">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2 sm:mt-0">
+          Tambah Tugas
+        </button>
+      </form>
+    </div>
+  <% } %>
+
+</body>
+
+</html>

@@ -5,6 +5,9 @@ const mongoose = require('mongoose');
 const Task = require('../models/Task');
 const User = require('../models/User');
 
+const Profile = require('../models/Profile');  // Adjust the path as needed
+
+
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
