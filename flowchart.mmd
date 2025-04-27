@@ -4,63 +4,81 @@ config:
 ---
 flowchart TD
  subgraph Authentication["Authentication"]
-        B("login.ejs")
-        C("register.ejs")
-        D("authRoutes.js")
+        loginPage("login.ejs")
+        registerPage("register.ejs")
+        authRoutes("authRoutes.js")
   end
  subgraph Profile["Profile"]
-        G("Profile.ejs")
-        H("profileRoutes.js")
-        I("verification-success.ejs")
-        K("reminder.js")
-        Z("emailer.js")
+        profilePage("Profile.ejs")
+        profileRoutes("profileRoutes.js")
   end
  subgraph Task["Task"]
-        F("Dashboard.ejs")
-        J("taskRoutes.js")
+        dashboardPage("Dashboard.ejs")
+        taskRoutes("taskRoutes.js")
+  end
+ subgraph Teams["Teams"]
+        teamsIndexPage("teams/index.ejs")
+        teamsShowPage("teams/show.ejs")
+        teamRoutes("teamRoutes.js")
   end
  subgraph Database["MongoDB Models"]
-        UM["User.js"]
-        PM["Profile.js"]
-        TM["Task.js"]
-        NM["Notes.js"]
+        userModel("User.js")
+        profileModel("Profile.js")
+        taskModel("Task.js")
+        teamModel("Team.js")
+        notesModel("Notes.js")
   end
-    A["User"] -- GET /auth/login --> B
-    A -- GET /auth/register --> C
-    B -- POST /auth/login --> D
-    C -- POST /auth/register --> D
-    D -- Success --> E["GET /tasks"]
-    E -- Renders --> F
-    F -- GET /profile --> G
-    G -- "POST /profile/edit-phone/:id" --> H
-    G -- "POST /profile/edit-name/:id" --> H
-    A -- "GET /profile/verify-phone/:token" --> I
-    H --> K & PM & Z
-    K -- Mengirim --> L["WhatsApp Message"]
-    Z -- Mengirim --> x["Email"]
-    F -- POST /tasks/add --> J
-    F -- POST /tasks/complete/:id --> J
-    F -- POST /tasks/edit/:id --> J
-    F -- POST /tasks/delete/:id --> J
-    F -- POST /tasks/addnotes --> J
-    F -- POST /tasks/deletenotes/:id --> J
-    D --> UM
-    J --> TM & NM
-    style B fill:#ccf,stroke:#333,stroke-width:2px
-    style C fill:#ccf,stroke:#333,stroke-width:2px
-    style D fill:#fcf,stroke:#333,stroke-width:2px
-    style G fill:#ccf,stroke:#333,stroke-width:2px
-    style H fill:#fcf,stroke:#333,stroke-width:2px
-    style I fill:#ccf,stroke:#333,stroke-width:2px
-    style K fill:#fcf,stroke:#333,stroke-width:2px
-    style Z fill:#fcf,stroke:#333,stroke-width:2px
-    style F fill:#ccf,stroke:#333,stroke-width:2px
-    style J fill:#fcf,stroke:#333,stroke-width:2px
-    style UM fill:#fcf,stroke:#333,stroke-width:2px
-    style PM fill:#fcf,stroke:#333,stroke-width:2px
-    style TM fill:#fcf,stroke:#333,stroke-width:2px
-    style NM fill:#fcf,stroke:#333,stroke-width:2px
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style E fill:#cfc,stroke:#333,stroke-width:2px
-    style L fill:#ccf,stroke:#333,stroke-width:2px
-    style x fill:#ccf,stroke:#333,stroke-width:2px
+ subgraph noGroup["NoGroup"]
+        verificationSuccessPage("verification-success.ejs")
+        reminderService("reminder.js")
+        emailService("emailer.js")
+  end
+    dashboardPage -- GET /teams --> teamsIndexPage
+    userEntity["user"] -- GET /auth/login --> loginPage
+    userEntity -- GET /auth/register --> registerPage
+    loginPage -- POST /auth/login --> authRoutes
+    registerPage -- POST /auth/register --> authRoutes
+    authRoutes -- Success --> redirectTasks["GET /tasks"]
+    redirectTasks -- Renders --> dashboardPage
+    dashboardPage -- GET /profile --> profilePage
+    profilePage -- "POST /profile/edit-phone/:id" --> profileRoutes
+    profilePage -- "POST /profile/edit-name/:id" --> profileRoutes
+    userEntity -- "GET /profile/verify-phone/:token or GET teams/:id/invite/:token" --> verificationSuccessPage
+    profileRoutes --> reminderService & profileModel & emailService
+    reminderService -- Mengirim --> whatsAppMessage["WhatsApp Message"]
+    emailService -- Mengirim --> emailMessage["Email"]
+    dashboardPage -- POST /tasks/add --> taskRoutes
+    dashboardPage -- POST /tasks/complete/:id --> taskRoutes
+    dashboardPage -- POST /tasks/edit/:id --> taskRoutes
+    dashboardPage -- POST /tasks/delete/:id --> taskRoutes
+    dashboardPage -- POST /tasks/addnotes --> taskRoutes
+    dashboardPage -- POST /tasks/deletenotes/:id --> taskRoutes
+    authRoutes --> userModel
+    taskRoutes --> taskModel & notesModel
+    teamsIndexPage -- POST /teams/create --> teamRoutes
+    teamsIndexPage -- get /teams/:id --> teamsShowPage
+    teamsShowPage -- "POST /teams/:id/add-member" --> teamRoutes
+    teamRoutes -- mengirim invite ke email --> emailService
+    teamRoutes --> teamModel
+    style loginPage fill:#ccf,stroke:#333,stroke-width:2px
+    style registerPage fill:#ccf,stroke:#333,stroke-width:2px
+    style authRoutes fill:#fcf,stroke:#333,stroke-width:2px
+    style profilePage fill:#ccf,stroke:#333,stroke-width:2px
+    style profileRoutes fill:#fcf,stroke:#333,stroke-width:2px
+    style dashboardPage fill:#ccf,stroke:#333,stroke-width:2px
+    style taskRoutes fill:#fcf,stroke:#333,stroke-width:2px
+    style teamsIndexPage fill:#ccf,stroke:#333,stroke-width:2px
+    style teamsShowPage fill:#ccf,stroke:#333,stroke-width:2px
+    style teamRoutes fill:#fcf,stroke:#333,stroke-width:2px
+    style userModel fill:#fcf,stroke:#333,stroke-width:2px
+    style profileModel fill:#fcf,stroke:#333,stroke-width:2px
+    style taskModel fill:#fcf,stroke:#333,stroke-width:2px
+    style teamModel fill:#fcf,stroke:#333,stroke-width:2px
+    style notesModel fill:#fcf,stroke:#333,stroke-width:2px
+    style verificationSuccessPage fill:#ccf,stroke:#333,stroke-width:2px
+    style reminderService fill:#fcf,stroke:#333,stroke-width:2px
+    style emailService fill:#fcf,stroke:#333,stroke-width:2px
+    style userEntity fill:#f9f,stroke:#333,stroke-width:2px
+    style redirectTasks fill:#cfc,stroke:#333,stroke-width:2px
+    style whatsAppMessage fill:#ccf,stroke:#333,stroke-width:2px
+    style emailMessage fill:#ccf,stroke:#333,stroke-width:2px

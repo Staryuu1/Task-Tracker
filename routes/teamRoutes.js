@@ -3,6 +3,8 @@ const router = express.Router();
 const Team = require('../models/Team');
 const User = require('../models/User');
 const Task = require('../models/Task');
+const {sendEmailReminder} = require('../modules/mailer');
+const jwt = require('jsonwebtoken');
 const { ensureAuthenticated } = require('../middleware/authMiddleware');
 
 // Lihat semua tim milik user
@@ -86,61 +88,111 @@ router.get('/:id', ensureAuthenticated, async (req, res) => {
     }
 });
 
+
+
 router.post('/:id/add-member', ensureAuthenticated, async (req, res) => {
     try {
+        const { email } = req.body;
         const team = await Team.findById(req.params.id);
-        const email = req.body.email;
-
-        if (!team) return res.status(404).send('Tim tidak ditemukan');
+        if (!team) return res.status(404).send('❌ Tim tidak ditemukan');
 
         const user = await User.findOne({ email });
+        if (!user) return res.status(404).send('❌ Pengguna dengan email tersebut tidak ditemukan');
 
-        if (!user) return res.status(404).send('Pengguna dengan email tersebut tidak ditemukan');
+       
+        const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const inviteLink = `${process.env.BASE_URL}/teams/${team._id}/invite/${token}`;
 
-        if (!team.members.includes(user._id)) {
-            team.members.push(user._id);
-            await team.save();
-        }
+       
+        const subject = `📩 Undangan Bergabung ke Tim "${team.name}"`;
+        const plainText = `
+        Hai ${user.username || 'Teman'}, 
 
-        res.redirect(`/teams/${team._id}`);
+        Kamu diundang untuk bergabung ke tim "${team.name}".
+
+        Klik link berikut untuk bergabung:
+        ${inviteLink}
+
+        Link ini akan kadaluarsa dalam 1 jam.
+        `;
+
+        const html = `
+        <h3>📩 Undangan Bergabung ke Tim "<strong>${team.name}</strong>"</h3>
+        <p>Halo ${user.username || 'Teman'},</p>
+        <p>Kamu diundang untuk bergabung ke tim "<strong>${team.name}</strong>".</p>
+        <p>Klik tombol di bawah ini untuk menerima undangan:</p>
+        <a href="${inviteLink}" style="display:inline-block; padding:10px 20px; background-color:#000; color:#fff; border-radius:5px; text-decoration:none;">Gabung Sekarang</a>
+        <p>atau tekan tautan di bawah ini untuk menerima undangan:</p>
+        ${inviteLink}
+        <p><small>⚠️ Link ini berlaku selama 1 jam.</small></p>
+        `;
+
+        await sendEmailReminder(user.email, subject, html, plainText);
+        console.log(`✅ Undangan dikirim ke ${user.email}`);
+
+        res.render('teams/show', { team, user: req.user,  message: {
+            title: 'Undangan Terkirim!',
+            text: `Undangan berhasil dikirim ke ${user.email}.`,
+            icon: 'success'
+        } });
     } catch (err) {
-        res.status(500).send('Gagal menambahkan anggota');
+        console.error(err);
+        res.status(500).send('❌ Gagal mengirim undangan');
     }
 });
 
-router.post('/:id/add-task', ensureAuthenticated, async (req, res) => {
+
+router.get("/:id/invite/:token", ensureAuthenticated, async (req, res) => {
     try {
-        const team = await Team.findById(req.params.id);
+        const { token } = req.params;
+        const team = await Team.findById(req.params.id)
+            .populate('leader')
+            .populate('members')
+            .populate('tasks');
+
         if (!team) return res.status(404).send('Tim tidak ditemukan');
 
-        
-        if (team.leader._id.toString() !== req.user._id.toString()) {
-            return res.status(403).send('Hanya leader yang dapat menambahkan tugas');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findOne({ email: decoded.email });
+
+        if (!user) return res.status(404).send('Pengguna tidak ditemukan');
+
+        if (!req.user._id.equals(user._id)) {
+            return res.status(403).send('Undangan ini bukan untuk akun kamu');
         }
 
-        
-        const newTask = new Task({
-            title: req.body.title,
-            description: req.body.description,
-            dueDate: req.body.dueDate,
-            priority: req.body.priority,
-            category: "Team",  
-            completed: false,  
-            user: team.leader._id,  
-        });
+        const isMember = team.members.some(memberId => memberId.equals(user._id));
 
         
-        await newTask.save();
+        if (!isMember) {
+            team.members.push(user._id);
+            await team.save();
 
-       
-        team.tasks.push(newTask);
-        await team.save();
-
-        res.redirect(`/teams/${team._id}`);
-
+            
+            res.render('teams/show', { 
+                team, 
+                user: req.user,  
+                message: {
+                    title: 'Berhasil Bergabung',
+                    text: `Kamu berhasil bergabung ke tim!`,
+                    icon: 'success'
+                } 
+            });
+        } else {
+            
+            res.render('teams/show', { 
+                team, 
+                user: req.user,  
+                message: {
+                    title: 'Sudah Bergabung',
+                    text: `Kamu sudah menjadi anggota tim.`,
+                    icon: 'info'
+                } 
+            });
+        }
     } catch (err) {
         console.error(err);
-        res.status(500).send('Terjadi kesalahan saat menambahkan tugas');
+        res.status(500).send("Terjadi kesalahan saat memproses undangan.");
     }
 });
 
