@@ -49,15 +49,16 @@
 
     <!-- Form Buat Tim Baru -->
     <h2 class="text-xl font-bold mt-6 mb-4 text-gray-800">Buat Tim Baru</h2>
-    <form action="/teams/create" method="POST" class="space-y-4">
+    <!-- <forma action="/teams/create" method="POST"></form> -->
+    <div  class="space-y-4">
       <div>
         <input type="text" name="name" placeholder="Nama Tim" required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"/>
       </div>
       <div>
         <textarea name="description" placeholder="Deskripsi Tim" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
       </div>
-      <button type="submit" class="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors">Buat</button>
-    </form>
+      <button class="w-full py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors create-team">Buat</button>
+    </div>
   </div>
 
 </body>
@@ -71,5 +72,51 @@
         });
     </script>
 <% } %>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelector(".create-team").addEventListener("click", function(event) {
+      event.preventDefault();
+
+      const name = document.querySelector("input[name='name']").value.trim();
+      const description = document.querySelector("textarea[name='description']").value.trim();
+      console.log(name,description)
+
+      if (!name) {
+        Swal.fire("Oops!", "Nama tim wajib diisi.", "warning");
+        return;
+      }
+
+      Swal.fire({
+        title: "Buat Tim?",
+        text: "Apakah kamu yakin ingin membuat tim ini?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Ya, buat!",
+        cancelButtonText: "Batal"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/teams/create`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name, description })
+          })
+          .then(async res => {
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Gagal membuat tim");
+
+            Swal.fire("Berhasil!", data.message || "Tim berhasil dibuat.", "success")
+              .then(() => location.reload());
+          })
+          .catch((err) => {
+            Swal.fire("Error", err.message || "Terjadi kesalahan", "error");
+          });
+        }
+      });
+    });
+    
+  });
+</script> 
 
 </html>

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const NotesSchema = new mongoose.Schema({
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, // Pastikan setiap task terkait dengan pengguna
+    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     title: { type: String, required: true },
     notes:{ type: String, required: true},
 });

@@ -31,14 +31,11 @@ router.post('/create', ensureAuthenticated, async (req, res) => {
         const leadTeams = allTeams.filter(team => team.leader._id.equals(req.user._id));
         const memberTeams = allTeams.filter(team => !team.leader._id.equals(req.user._id));
         if (existingTeam) {
-            return res.render('teams/index', {
-                leadTeams, memberTeams,
-                message: {
-                    title: 'Gagal Membuat Tim',
-                    text: 'Anda sudah menjadi leader di tim lain. Hanya diperbolehkan memiliki satu tim.',
-                    icon: 'error'
-                }
-            });
+            if (existingTeam) {
+                return res.status(400).json({
+                  error: 'Anda sudah menjadi leader di tim lain. Hanya diperbolehkan memiliki satu tim.'
+                });
+            }
         }
 
         const team = new Team({
@@ -50,24 +47,15 @@ router.post('/create', ensureAuthenticated, async (req, res) => {
 
         await team.save();
 
-        res.render('teams/index', {
-            leadTeams, memberTeams,
-            message: {
-                title: 'Tim Berhasil Dibuat!',
-                text: 'Tim baru Anda telah berhasil dibuat.',
-                icon: 'success'
-            }
+        return res.status(201).json({
+            message: 'Tim berhasil dibuat.'
         });
+      
 
     } catch (err) {
         console.error(err);
-        res.status(500).render('teams/index', {
-            leadTeams, memberTeams,
-            message: {
-                title: 'Gagal Membuat Tim',
-                text: 'Terjadi kesalahan saat membuat tim.',
-                icon: 'error'
-            }
+        return res.status(500).json({
+        error: 'Terjadi kesalahan saat membuat tim.'
         });
     }
 });
