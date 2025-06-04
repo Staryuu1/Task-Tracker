@@ -62,16 +62,6 @@
   </div>
 
 </body>
-<% if (typeof message !== 'undefined' && message) { %>
-    <script>
-        Swal.fire({
-            title: '<%= message.title %>',
-            text: '<%= message.text %>',
-            icon: '<%= message.icon %>',
-            confirmButtonText: 'OK'
-        });
-    </script>
-<% } %>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     document.querySelector(".create-team").addEventListener("click", function(event) {

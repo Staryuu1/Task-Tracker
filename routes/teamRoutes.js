@@ -156,7 +156,6 @@ router.get("/:id/invite/:token", ensureAuthenticated, async (req, res) => {
             team.members.push(user._id);
             await team.save();
 
-            
             res.render('teams/show', { 
                 team, 
                 user: req.user,  
@@ -167,7 +166,6 @@ router.get("/:id/invite/:token", ensureAuthenticated, async (req, res) => {
                 } 
             });
         } else {
-            
             res.render('teams/show', { 
                 team, 
                 user: req.user,  
@@ -184,6 +182,80 @@ router.get("/:id/invite/:token", ensureAuthenticated, async (req, res) => {
     }
 });
 
+router.post('/:id/add-task', ensureAuthenticated, async (req, res) => {
+
+    try {
+        const team = await Team.findById(req.params.id);
+
+        if (!team) return res.status(404).send('Tim tidak ditemukan');
+
+        if (team.leader._id.toString() !== req.user._id.toString()) {
+            return res.status(403).send('Hanya leader yang dapat menambahkan tugas');
+        }
+        
+        const newTask = new Task({
+            title: req.body.title,
+            description: req.body.description,
+            dueDate: req.body.dueDate,
+            priority: req.body.priority,
+            category: "Team",  
+            completed: false,  
+            user: team.leader._id,  
+        });
+        await newTask.save();
+
+        team.tasks.push(newTask);
+        await team.save();
+
+       
+        return res.status(200).json({
+            message: 'Tugas berhasil Ditambahkan.'
+        });
+      
+         
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Terjadi kesalahan saat menambahkan tugas');
+    }
+});
+
+router.post('/:id/add-meet', ensureAuthenticated, async (req, res) => {
+
+    try {
+        const team = await Team.findById(req.params.id);
+
+        if (!team) return res.status(404).send('Tim tidak ditemukan');
+
+        if (team.leader._id.toString() !== req.user._id.toString()) {
+            return res.status(403).send('Hanya leader yang dapat menjadwalkan meeting');
+        }
+        
+        const newTask = new Task({
+            title: req.body.title,
+            description: req.body.description,
+            dueDate: new Date(req.body.dueDate),
+            priority: req.body.priority,
+            category: "Meeting",  
+            completed: false,  
+            user: team.leader._id,  
+        });
+        await newTask.save();
+
+        team.tasks.push(newTask);
+        await team.save();
+       
+        return res.status(200).json({
+            message: 'Meeting berhasil dijawlaknan.'
+        });
+      
+         
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Terjadi kesalahan saat menjadwalkan meeting');
+    }
+});
 
 
 module.exports = router;

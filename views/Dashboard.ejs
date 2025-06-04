@@ -63,11 +63,14 @@
                 <li class="mr-1">
                     <a class="tab bg-gray-200 inline-block py-2 px-4 text-gray-500 hover:text-black font-semibold cursor-pointer" data-category="Task">Task</a>
                 </li>
-                <li class="mr-1">
+                <!-- <li class="mr-1">
                     <a class="tab bg-gray-200 inline-block py-2 px-4 text-gray-500 hover:text-black font-semibold cursor-pointer" data-category="Personal">Personal</a>
                 </li>
                 <li class="mr-1">
                     <a class="tab bg-gray-200 inline-block py-2 px-4 text-gray-500 hover:text-black font-semibold cursor-pointer" data-category="Work">Work</a>
+                </li> -->
+                <li class="mr-1">
+                    <a class="tab bg-gray-200 inline-block py-2 px-4 text-gray-500 hover:text-black font-semibold cursor-pointer" data-category="Meeting">Meeting</a>
                 </li>
             </ul>
         </div>
@@ -117,6 +120,9 @@
                           <% } %>
                           <% if (task.category === 'Team') { %>
                             <span class="bg-blue-500 text-white rounded px-2 py-1 text-sm">Team Task</span>
+                          <% } %>
+                          <% if (task.category === 'Meeting') { %>
+                            <span class="bg-blue-500 text-white rounded px-2 py-1 text-sm">Team Meeting</span>
                           <% } %>
                         </div>
                     </div>
@@ -185,7 +191,7 @@
             // Filter tugas berdasarkan kategori
             let visibleTasks = 0;
             tasks.forEach((task) => {
-                if (category === "all" || task.getAttribute("data-category") === category) {
+                if (category === "All" || task.getAttribute("data-category") === category || category == "Task" && task.getAttribute("data-category") == "Team") {
                     task.style.display = "flex";
                     visibleTasks++;
                 } else {
@@ -193,7 +199,6 @@
                 }
             });
 
-            // Tampilkan atau sembunyikan pesan "No tasks available"
             if (visibleTasks === 0) {
                 noTaskMessage.classList.remove("hidden");
             } else {
@@ -215,12 +220,6 @@
             <option value="medium">Medium</option>
             <option value="high">High</option>
           </select>
-          <select id="task-category" class="swal2-select">
-            <option value="">Select Category</option>
-            <option value="Work">Work</option>
-            <option value="Personal">Personal</option>
-            <option value="Task">Others</option>
-          </select>
         `,
         showCancelButton: true,
         confirmButtonText: "Add",
@@ -229,9 +228,9 @@
           const description = document.getElementById("task-desc").value;
           const dueDate = document.getElementById("task-date").value;
           const priority = document.getElementById("task-priority").value;
-          const category = document.getElementById("task-category").value;
+          const category = "Task";
 
-          if (!title || !description || !dueDate || !priority || !category) {
+          if (!title || !description || !dueDate || !priority ) {
             Swal.showValidationMessage("Please enter all fields");
             return false;
           }

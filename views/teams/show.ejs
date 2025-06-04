@@ -28,15 +28,15 @@
       <% }) %>
     </ul>
 
-    <!-- Form Tambah Anggota (Hanya untuk Leader) -->
+    <!-- div Tambah Anggota (Hanya untuk Leader) -->
     <% if (team.leader._id.toString() === user._id.toString()) { %>
       <h3 class="text-lg font-semibold text-gray-800 mt-6 mb-2">Tambah Anggota</h3>
-      <form action="/teams/<%= team._id %>/add-member" method="POST" class="space-y-4">
+      <div action="/teams/<%= team._id %>/add-member" method="POST" class="space-y-4">
         <div>
           <input type="email" name="email" placeholder="Email Pengguna" required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors">Tambah</button>
-      </form>
+      </div>
     <% } %>  
 
     <h3 class="text-2xl font-semibold mb-3">📋 Tugas Tim</h3>
@@ -56,7 +56,7 @@
 <% if (team.leader._id.toString() === user._id.toString()) { %>
     <div class="bg-gray-50 border rounded p-4 mb-6">
       <h3 class="text-lg font-semibold mb-2">Tambah Tugas</h3>
-      <form action="/teams/<%= team._id %>/add-task" method="POST" class="flex flex-col gap-2 sm:flex-row sm:items-center">
+      <div id="add-task-div" class="flex flex-col gap-2 sm:flex-row sm:items-center">
         <input type="text" name="title" placeholder="Judul Tugas" required class="flex-1 border px-3 py-2 rounded" />
         <textarea name="description" placeholder="Deskripsi Tugas" required class="flex-1 border px-3 py-2 rounded mt-2"></textarea>
         <input type="date" name="dueDate" required class="flex-1 border px-3 py-2 rounded mt-2" />
@@ -65,22 +65,115 @@
           <option value="medium">Medium</option>
           <option value="high">High</option>
         </select>
-        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2 sm:mt-0">
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2 sm:mt-0 add-task">
           Tambah Tugas
         </button>
-      </form>
+      </div>
+      <h3 class="text-lg font-semibold mb-2">Jadwalkan Meeting</h3>
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+        <input type="text" name="title-meet" placeholder="Nama Meeting" required class="flex-1 border px-3 py-2 rounded" />
+        <textarea name="description-meet" placeholder="Deskripsi Meeting (Link/pin meeting)" required class="flex-1 border px-3 py-2 rounded mt-2"></textarea>
+        <input type="datetime-local" name="dueDate-meet" required class="flex-1 border px-3 py-2 rounded mt-2" />
+        <select name="priority-meet" required class="flex-1 border px-3 py-2 rounded mt-2">
+          <option value="low">Low</option>
+          <option value="medium">Medium</option>
+          <option value="high">High</option>
+        </select>
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2 sm:mt-0 add-meet">
+          Jadwalkan
+        </button>
+      </div>
     </div>
   <% } %>
 
 </body>
-<% if (typeof message !== 'undefined' && message) { %>
-  <script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector(".add-task").addEventListener("click", function (event) {
+      event.preventDefault();
+
+      const title = document.querySelector("input[name='title']").value.trim();
+      const description = document.querySelector("textarea[name='description']").value.trim();
+      const dueDate = document.querySelector("input[name='dueDate']").value;
+      const priority = document.querySelector("select[name='priority']").value;
+
+      if (!title || !description || !dueDate || !priority) {
+        Swal.fire("Oops!", "Semua field wajib diisi.", "warning");
+        return;
+      }
+
       Swal.fire({
-          title: '<%= message.title %>',
-          text: '<%= message.text %>',
-          icon: '<%= message.icon %>',
-          confirmButtonText: 'OK'
+        title: "Tambah Tugas?",
+        text: "Apakah kamu yakin ingin menambahkan tugas ini?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Ya, tambah!",
+        cancelButtonText: "Batal"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/teams/<%= team._id %>/add-task`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ title, description, dueDate, priority })
+          })
+            .then(async res => {
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || "Gagal menambahkan tugas");
+
+              Swal.fire("Berhasil!", data.message || "Tugas berhasil ditambahkan.", "success")
+                .then(() => location.reload());
+            })
+            .catch((err) => {
+              Swal.fire("Error", err.message || "Terjadi kesalahan", "error");
+            });
+        }
       });
-  </script>
-<% } %>
+    });
+    document.querySelector(".add-meet").addEventListener("click", function (event) {
+      event.preventDefault();
+
+      const title = document.querySelector("input[name='title-meet']").value.trim();
+      const description = document.querySelector("textarea[name='description-meet']").value.trim();
+      const dueDate = document.querySelector("input[name='dueDate-meet']").value;
+      const priority = document.querySelector("select[name='priority-meet']").value;
+
+      if (!title || !description || !dueDate || !priority) {
+        Swal.fire("Oops!", "Semua field wajib diisi.", "warning");
+        return;
+      }
+
+      Swal.fire({
+        title: "Jadwalkan Meeting?",
+        text: "Apakah kamu yakin ingin menjadwalkan meeting ini?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Ya, Jadwalkan!",
+        cancelButtonText: "Batal"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/teams/<%= team._id %>/add-meet`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ title, description, dueDate, priority })
+          })
+            .then(async res => {
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || "Gagal menjadwalkan meeting");
+
+              Swal.fire("Berhasil!", data.message || "Meeting berhasil dijadwalkan.", "success")
+                .then(() => location.reload());
+            })
+            .catch((err) => {
+              Swal.fire("Error", err.message || "Terjadi kesalahan", "error");
+            });
+        }
+      });
+    });
+  });
+</script>
+
 </html>
