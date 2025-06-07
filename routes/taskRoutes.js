@@ -164,4 +164,105 @@ router.post("/deletenotes/:id", ensureAuthenticated, async (req, res) => {
         res.status(500).send("Error deleting task");
     }
 });
+
+
+router.get("/tasks-in-month", ensureAuthenticated, async (req, res) => {
+    try {
+        const year = parseInt(req.query.year);
+        const month = parseInt(req.query.month);
+
+        if (isNaN(year) || isNaN(month)) {
+            return res.status(400).json({ error: "Invalid year or month" });
+        }
+
+        const userId = req.user.id;
+
+        // Awal dan akhir bulan
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+        // Cari task user di rentang waktu tsb
+        const personalTasks = await Task.find({
+            user: userId,
+            dueDate: { $gte: startDate, $lte: endDate }
+        });
+
+        // Cari task team
+        const teams = await Team.find({ members: userId }).populate('tasks');
+        const teamTasks = teams.flatMap(team => team.tasks).filter(task => {
+            const due = new Date(task.dueDate);
+            return due >= startDate && due <= endDate;
+        });
+
+        // Gabungkan + hilangkan duplikat
+        const allTasks = [...personalTasks, ...teamTasks];
+        const uniqueTasks = [];
+        const seen = new Set();
+        for (const task of allTasks) {
+            const id = task._id.toString();
+            if (!seen.has(id)) {
+                uniqueTasks.push(task);
+                seen.add(id);
+            }
+        }
+
+        // Buat mapping tasksByDay: { tanggal: [ {priority, ...}, ... ] }
+        const tasksByDay = {};
+        uniqueTasks.forEach(task => {
+            const day = new Date(task.dueDate).getDate();
+            if (!tasksByDay[day]) tasksByDay[day] = [];
+            tasksByDay[day].push({ priority: task.priority });
+        });
+
+        const uniqueTaskDays = Object.keys(tasksByDay).map(Number);
+
+        res.json({ daysWithTasks: uniqueTaskDays, tasksByDay });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+
+router.get("/tasks-in-day", ensureAuthenticated, async (req, res) => {
+    try {
+        const year = parseInt(req.query.year);
+        const month = parseInt(req.query.month); 
+        const day = parseInt(req.query.day);
+        if (isNaN(year) || isNaN(month) || isNaN(day)) {
+            return res.status(400).json({ error: "Invalid year, month, or day" });
+        }
+        const userId = req.user.id;
+        // Start and end of the day
+        const startDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+        const endDate = new Date(year, month - 1, day, 23, 59, 59, 999);
+        // Personal tasks
+        const personalTasks = await Task.find({
+            user: userId,
+            dueDate: { $gte: startDate, $lte: endDate }
+        });
+        // Team tasks
+        const teams = await Team.find({ members: userId }).populate('tasks');
+        const teamTasks = teams.flatMap(team => team.tasks).filter(task => {
+            const due = new Date(task.dueDate);
+            return due >= startDate && due <= endDate;
+        });
+        // Merge and deduplicate
+        const allTasks = [...personalTasks, ...teamTasks];
+        const uniqueTasks = [];
+        const seen = new Set();
+        for (const task of allTasks) {
+            const id = task._id.toString();
+            if (!seen.has(id)) {
+                uniqueTasks.push(task);
+                seen.add(id);
+            }
+        }
+        res.json({ tasks: uniqueTasks });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 module.exports = router;

@@ -170,9 +170,37 @@
                 </button>
             </div>
         </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 mt-4">
+          <!-- Mini Calendar -->
+          <div class="bg-white border border-300 rounded-lg p-6 shadow-sm flex flex-col">
+            <h4 class="font-semibold text-gray-900 mb-4 flex justify-between items-center">
+              <button id="prevMonth" class="text-black-500 hover:underline">&lt;</button>
+              <span id="calendarTitle">Loading...</span>
+              <button id="nextMonth" class="text-black-500 hover:underline">&gt;</button>
+            </h4>
+            <div class="grid grid-cols-7 gap-1 select-none text-center text-sm  mb-2">
+              <div class="font-semibold text-black-600">Sun</div>
+              <div class="font-semibold text-black-600">Mon</div>
+              <div class="font-semibold text-black-600">Tue</div>
+              <div class="font-semibold text-black-600">Wed</div>
+              <div class="font-semibold text-black-600">Thu</div>
+              <div class="font-semibold text-black-600">Fri</div>
+              <div class="font-semibold text-black-600">Sat</div>
+            </div>
+            <div id="calendarDays" class="grid grid-cols-7 gap-1 text-sm text-gray-700"></div>
+          </div>
+          <!-- Detail Tugas Hari Dipilih -->
+          <div class="bg-white border border-300 rounded-lg p-6 shadow-sm flex flex-col">
+            <h4 class="font-semibold text-gray-900 mb-4" id="selectedDayTitle">Tasks on Selected Day</h4>
+            <ul id="selectedDayTasks" class="space-y-4 text-gray-600 text-sm min-h-[40px] max-h-72 overflow-y-auto">
+              <li class="text-gray-400 italic">Select a date to see tasks.</li>
+            </ul>
+          </div>
+        </div>
     </div>
 </body>
-
+</html>
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     const tabs = document.querySelectorAll(".tab");
@@ -507,4 +535,148 @@
   });
 </script>
 
-</html>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const calendarTitle = document.getElementById("calendarTitle");
+  const calendarDays = document.getElementById("calendarDays");
+  const prevMonthBtn = document.getElementById("prevMonth");
+  const nextMonthBtn = document.getElementById("nextMonth");
+
+  let currentDate = new Date();
+  let lastSelectedBtn = null;
+  let lastSelectedDay = null;
+  let lastSelectedMonth = null;
+  let lastSelectedYear = null;
+  let lastTasksByDay = {};
+
+  function renderCalendar() {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    // Set title
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    calendarTitle.textContent = `${monthNames[month]} ${year}`;
+
+    // Clear existing days
+    calendarDays.innerHTML = "";
+
+    // First day of month
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // Empty slots for alignment
+    for (let i = 0; i < firstDay; i++) {
+      const emptyCell = document.createElement("div");
+      calendarDays.appendChild(emptyCell);
+    }
+
+    // Fetch tasks in month
+    fetch(`tasks/tasks-in-month?year=${year}&month=${month + 1}`)
+      .then(response => response.json())
+      .then(data => {
+        const daysWithTasks = data.daysWithTasks || [];
+        const tasksByDay = data.tasksByDay || {};
+        lastTasksByDay = tasksByDay;
+
+        // Render days
+        for (let day = 1; day <= daysInMonth; day++) {
+          const dayBtn = document.createElement("button");
+          dayBtn.textContent = day;
+          dayBtn.type = "button";
+          dayBtn.className = "py-2 rounded hover:bg-blue-100 transition relative w-full";
+
+          // Tandai hari ini
+          const today = new Date();
+          if (day === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
+            dayBtn.classList.add("bg-blue-200", "font-bold", "ring-2", "ring-blue-400");
+          }
+
+          // Jika ada task di hari ini, beri tanda (warna latar belakang)
+         if (tasksByDay[day] && tasksByDay[day].length > 0) {
+            let bgColor = "bg-green-200";
+            if (tasksByDay[day].some(t => t.priority === "high")) bgColor = "bg-red-200";
+            else if (tasksByDay[day].some(t => t.priority === "medium")) bgColor = "bg-orange-200";
+            dayBtn.classList.add(bgColor);
+          }
+
+          
+          dayBtn.addEventListener("click", () => {
+            if (lastSelectedBtn) lastSelectedBtn.classList.remove("ring-4", "ring-blue-300");
+            dayBtn.classList.add("ring-4", "ring-blue-300");
+            lastSelectedBtn = dayBtn;
+            lastSelectedDay = day;
+            lastSelectedMonth = month;
+            lastSelectedYear = year;
+            showTasksForSelectedDay(day, month, year, tasksByDay);
+          });
+
+          calendarDays.appendChild(dayBtn);
+        }
+        
+        // Otomatis tampilkan hari ini saat load
+        const today = new Date();
+        if (year === today.getFullYear() && month === today.getMonth()) {
+          showTasksForSelectedDay(today.getDate(), month, year, tasksByDay);
+        } else {
+          showTasksForSelectedDay(null, null, null, tasksByDay);
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching tasks in month:", err);
+      });
+  }
+
+  function showTasksForSelectedDay(day, month, year, tasksByDay) {
+    const ul = document.getElementById("selectedDayTasks");
+    const title = document.getElementById("selectedDayTitle");
+    ul.innerHTML = "";
+    if (!day) {
+      title.textContent = "Tasks on Selected Day";
+      ul.innerHTML = '<li class="text-gray-400 italic">No tasks for this day.</li>';
+      return;
+    }
+    /// mengambil data tugas dari backend
+    fetch(`/tasks/tasks-in-day?year=${year}&month=${month+1}&day=${day}`)
+      .then(response => response.json())
+      .then(data => {
+        const tasks = data.tasks || [];
+        if (tasks.length === 0) {
+          title.textContent = `Tasks on ${day}/${(month+1)}/${year}`;
+          ul.innerHTML = '<li class="text-gray-400 italic">No tasks for this day.</li>';
+          return;
+        }
+        title.textContent = `Tasks on ${day}/${(month+1)}/${year}`;
+        tasks.forEach((task, idx) => {
+          const li = document.createElement("li");
+          li.className = "bg-gray-100 p-3 rounded flex flex-col gap-1 border-l-4 " + (task.priority === "high" ? "border-red-500" : task.priority === "medium" ? "border-yellow-500" : "border-green-500");
+
+          li.innerHTML = `<span class="text-base font-semibold">${task.title || "Untitled Task"}</span>
+            <span class="text-sm text-gray-600">${task.description || "No description"}</span>
+            <span class="text-sm">Priority: <span class="${task.priority === 'high' ? 'text-red-500' : task.priority === 'medium' ? 'text-yellow-500' : 'text-green-500'} font-semibold">${task.priority}</span></span>`;
+          ul.appendChild(li);
+        });
+      })
+      .catch(() => {
+        title.textContent = `Tasks on ${day}/${(month+1)}/${year}`;
+        ul.innerHTML = '<li class="text-gray-400 italic">Failed to load tasks.</li>';
+      });
+  }
+
+  // Navigation buttons
+  prevMonthBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar();
+  });
+
+  nextMonthBtn.addEventListener("click", () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar();
+  });
+
+  // Initial render
+  renderCalendar();
+});
+</script>

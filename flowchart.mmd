@@ -53,6 +53,8 @@ flowchart TD
     dashboardPage -- POST /tasks/delete/:id --> taskRoutes
     dashboardPage -- POST /tasks/addnotes --> taskRoutes
     dashboardPage -- POST /tasks/deletenotes/:id --> taskRoutes
+    dashboardPage -- GET /tasks-in-month --> taskRoutes
+    dashboardPage -- GET /tasks-in-day --> taskRoutes
     authRoutes --> userModel
     taskRoutes --> taskModel & notesModel
     teamsIndexPage -- POST /teams/create --> teamRoutes
