@@ -6,6 +6,7 @@ const ProfileSchema = new mongoose.Schema({
     phoneNumber: { type: String, required: true, default: "0" }, 
     phoneVerified:{type: Boolean, default: false},
     emailVerified:{type: Boolean, default: false},
+    whatsappNotif: { type: Boolean, default: false }
 });
 
 module.exports = mongoose.model('Profiles', ProfileSchema);

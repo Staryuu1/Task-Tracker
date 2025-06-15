@@ -8,13 +8,25 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-gray-100 text-gray-900 p-6">
-  <div class="mb-4">
+<body class="bg-gradient-to-br from-blue-100 to-blue-300 min-h-screen text-gray-900 p-6">
+  <!-- <div class="mb-4">
     <button onclick="window.location.href='/teams'" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
       ← Kembali
     </button>
+  </div> -->
+  <div class="container mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Detail Tim</h1>
+      <div>
+        <a href="/teams" class="text-gray-600 hover:text-gray-800 mr-4">Teams</a>
+        <a href="/tasks" class="text-gray-600 hover:text-gray-800 mr-4">Home</a>
+        <a href="/auth/logout" class="text-gray-600 hover:text-gray-800">Logout</a>
+      </div>
+    </div>
   </div>
   <div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
+     <!-- Header -->
+
     <!-- Nama Tim -->
     <h2 class="text-2xl font-bold text-gray-800 mb-4"><%= team.name %></h2>
     <p class="text-gray-600 mb-4"><%= team.description %></p>
@@ -27,66 +39,72 @@
         <li class="bg-gray-50 p-2 rounded-md shadow-sm hover:bg-gray-100 transition-colors"><%= member.username %></li>
       <% }) %>
     </ul>
-
+<!-- action="/teams/<%= team._id %>/add-member" method="POST" -->
     <!-- div Tambah Anggota (Hanya untuk Leader) -->
     <% if (team.leader._id.toString() === user._id.toString()) { %>
       <h3 class="text-lg font-semibold text-gray-800 mt-6 mb-2">Tambah Anggota</h3>
-      <div action="/teams/<%= team._id %>/add-member" method="POST" class="space-y-4">
+      <div class="space-y-4">
         <div>
-          <input type="email" name="email" placeholder="Email Pengguna" required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="email" name="email-member" placeholder="Email Pengguna" required class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
-        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors">Tambah</button>
+        <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors invite-member">Tambah</button>
       </div>
     <% } %>  
 
-    <h3 class="text-2xl font-semibold mb-3">📋 Tugas Tim</h3>
-<ul class="list-disc list-inside mb-6 space-y-2">
-  <% team.tasks.forEach(task => { %>
-    <li class="text-gray-800">
-      <strong><%= task.title %></strong> 
-      - <span class="text-gray-600">Priority: <%= task.priority %></span>
-      - <span class="text-gray-500">Due: <%= task.dueDate.toLocaleDateString() %></span>
-      - <span class="text-gray-500">Category: <%= task.category %></span> <!-- Tampilkan kategori -->
-    </li>
-  <% }) %>
-</ul>
+    <% if (team.tasks && team.tasks.length > 0) { %>
+      <h3 class="text-2xl font-semibold mb-3">📋 Tugas Tim</h3>
+      <ul class="list-disc list-inside mb-6 space-y-2">
+        <% team.tasks.forEach(task => { %>
+          <li class="text-gray-800">
+            <strong><%= task.title %></strong> 
+            - <span class="text-gray-600">Priority: <%= task.priority %></span>
+            - <span class="text-gray-500">Due: <%= task.dueDate.toLocaleDateString() %></span>
+            - <span class="text-gray-500">Category: <%= task.category %></span>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </div>
 
-
-  <!-- Tambah Tugas (Hanya Leader) -->
-<% if (team.leader._id.toString() === user._id.toString()) { %>
-    <div class="bg-gray-50 border rounded p-4 mb-6">
-      <h3 class="text-lg font-semibold mb-2">Tambah Tugas</h3>
-      <div id="add-task-div" class="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <input type="text" name="title" placeholder="Judul Tugas" required class="flex-1 border px-3 py-2 rounded" />
-        <textarea name="description" placeholder="Deskripsi Tugas" required class="flex-1 border px-3 py-2 rounded mt-2"></textarea>
-        <input type="date" name="dueDate" required class="flex-1 border px-3 py-2 rounded mt-2" />
-        <select name="priority" required class="flex-1 border px-3 py-2 rounded mt-2">
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2 sm:mt-0 add-task">
-          Tambah Tugas
-        </button>
-      </div>
-      <h3 class="text-lg font-semibold mb-2">Jadwalkan Meeting</h3>
-      <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
-        <input type="text" name="title-meet" placeholder="Nama Meeting" required class="flex-1 border px-3 py-2 rounded" />
-        <textarea name="description-meet" placeholder="Deskripsi Meeting (Link/pin meeting)" required class="flex-1 border px-3 py-2 rounded mt-2"></textarea>
-        <input type="datetime-local" name="dueDate-meet" required class="flex-1 border px-3 py-2 rounded mt-2" />
-        <select name="priority-meet" required class="flex-1 border px-3 py-2 rounded mt-2">
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
-        </select>
-        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2 sm:mt-0 add-meet">
-          Jadwalkan
-        </button>
-      </div>
-    </div>
-  <% } %>
+  <div class="container mx-auto bg-white p-6 rounded-lg shadow-md mt-6">
+    <!-- Tambah Tugas (Hanya Leader) -->
+    <% if (team.leader._id.toString() === user._id.toString()) { %>
+        <div class="bg-gray-50 border rounded p-4 mb-6">
+          <h3 class="text-lg font-semibold mb-2">Tambah Tugas</h3>
+          <div id="add-task-div" class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <input type="text" name="title" placeholder="Judul Tugas" required class="flex-1 border px-3 py-2 rounded" />
+            <textarea name="description" placeholder="Deskripsi Tugas" required class="flex-1 border px-3 py-2 rounded mt-2"></textarea>
+            <input type="date" name="dueDate" required class="flex-1 border px-3 py-2 rounded mt-2" />
+            <select name="priority" required class="flex-1 border px-3 py-2 rounded mt-2">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2 sm:mt-0 add-task">
+              Tambah Tugas
+            </button>
+          </div>
+          
+          <h3 class="text-lg font-semibold mb-2">Jadwalkan Meeting</h3>
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <input type="text" name="title-meet" placeholder="Nama Meeting" required class="flex-1 border px-3 py-2 rounded" />
+            <textarea name="description-meet" placeholder="Deskripsi Meeting (Link/pin meeting)" required class="flex-1 border px-3 py-2 rounded mt-2"></textarea>
+            <input type="datetime-local" name="dueDate-meet" required class="flex-1 border px-3 py-2 rounded mt-2" />
+            <select name="priority-meet" required class="flex-1 border px-3 py-2 rounded mt-2">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
+            <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mt-2 sm:mt-0 add-meet">
+              Jadwalkan
+            </button>
+          </div>
+        </div>
+      <% } %>
+  </div>
 
 </body>
+
 <script>
   document.addEventListener("DOMContentLoaded", function () {
     document.querySelector(".add-task").addEventListener("click", function (event) {
@@ -153,7 +171,7 @@
         cancelButtonText: "Batal"
       }).then((result) => {
         if (result.isConfirmed) {
-          fetch(`/teams/<%= team._id %>/add-meet`, {
+          fetch(`/teams/<%= team._id %>/add-member`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json"
@@ -165,6 +183,45 @@
               if (!res.ok) throw new Error(data.error || "Gagal menjadwalkan meeting");
 
               Swal.fire("Berhasil!", data.message || "Meeting berhasil dijadwalkan.", "success")
+                .then(() => location.reload());
+            })
+            .catch((err) => {
+              Swal.fire("Error", err.message || "Terjadi kesalahan", "error");
+            });
+        }
+      });
+    });
+
+    document.querySelector(".invite-member").addEventListener("click", function (event) {
+      event.preventDefault();
+
+      const email = document.querySelector("input[name='email-member']").value.trim();
+      
+      if (!email) {
+        Swal.fire("Oops!", "Email anggota wajib diisi.", "warning");
+        return;
+      }
+      Swal.fire({
+        title: "Tambah Anggota?",
+        text: "Apakah kamu yakin ingin menambahkan anggota ini?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Ya, Tambah!",
+        cancelButtonText: "Batal"
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(`/teams/<%= team._id %>/add-member`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ email })
+          })
+            .then(async res => {
+              const data = await res.json();
+              if (!res.ok) throw new Error(data.error || "Gagal menambahkan anggota");
+
+              Swal.fire("Berhasil!", data.message || "Anggota berhasil ditambahkan.", "success")
                 .then(() => location.reload());
             })
             .catch((err) => {

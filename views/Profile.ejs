@@ -8,76 +8,105 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
 </head>
-<body class="bg-gray-100 text-gray-800">
-    <div class="container mx-auto p-6">
-        <!-- Navbar -->
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold">Profile</h1>
-            <div>
-                <a href="/tasks" class="text-gray-600 hover:text-gray-800 mr-4">Home</a>
-                <a href="/auth/logout" class="text-gray-600 hover:text-gray-800">Logout</a>
-            </div>
-        </div>
-
-        <!-- Profile Card -->
-        <div class="bg-white p-6 rounded-lg shadow-md">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold"><%= user.username %></h2>
-                <p class="text-gray-600"><%= user.email %></p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Personal Information -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-3">Personal Information</h3>
-
-                    <div class="flex justify-between items-center">
-                        <p><strong>Full Name:</strong> <%= profile.name %></p>
-                        <button class="text-gray-500 hover:text-black edit-name" data-id="<%= profile._id %>">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <p><strong>Email:</strong> <%= user.email %></p>
-                        <button class="text-gray-500 hover:text-black edit-email" data-id="<%= profile._id %>">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <p><strong>Phone:</strong> <%= profile.phoneNumber %></p>
-                        <button class="text-gray-500 hover:text-black edit-phone" data-id="<%= profile._id %>">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Change Password -->
-                <div>
-                    <h3 class="text-lg font-semibold mb-3">Change Password</h3>
-                    <form>
-                        <div class="mb-4">
-                            <label class="block text-gray-700" for="current-password">Current Password</label>
-                            <input class="w-full px-4 py-2 border rounded" id="current-password" type="password"/>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700" for="new-password">New Password</label>
-                            <input class="w-full px-4 py-2 border rounded" id="new-password" type="password"/>
-                        </div>
-                        <div class="mb-4">
-                            <label class="block text-gray-700" for="confirm-password">Confirm New Password</label>
-                            <input class="w-full px-4 py-2 border rounded" id="confirm-password" type="password"/>
-                        </div>
-                        <button class="bg-blue-500 text-white px-4 py-2 rounded w-full" type="submit">
-                            Update Password
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
+<body class="bg-gradient-to-b from-blue-100 to-blue-300 min-h-screen text-gray-800">
+  <div class="container mx-auto p-6">
+    <!-- Navbar -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-2xl font-bold">Profile</h1>
+      <div>
+        <a href="/tasks" class="text-gray-600 hover:text-gray-800 mr-4">Home</a>
+        <a href="/auth/logout" class="text-gray-600 hover:text-gray-800">Logout</a>
+      </div>
     </div>
+
+    <!-- Profile Card -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+      <div class="mb-6">
+        <h2 class="text-2xl font-bold"><%= user.username %></h2>
+        <p class="text-gray-600"><%= user.email %></p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Personal Information -->
+        <div>
+          <h3 class="text-lg font-semibold mb-3">Personal Information</h3>
+
+          <div class="flex justify-between items-center">
+            <p><strong>Full Name:</strong> <%= profile.name %></p>
+            <button class="text-gray-500 hover:text-black edit-name" data-id="<%= profile._id %>">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <p><strong>Email:</strong> <%= user.email %></p>
+            <button class="text-gray-500 hover:text-black edit-email" data-id="<%= profile._id %>">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+
+          <div class="flex justify-between items-center">
+            <p><strong>Phone:</strong> <%= profile.phoneNumber %></p>
+            <button class="text-gray-500 hover:text-black edit-phone" data-id="<%= profile._id %>">
+              <i class="fas fa-edit"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Change Password -->
+        <div>
+          <h3 class="text-lg font-semibold mb-3">Change Password</h3>
+          <form id="updatePasswordForm">
+            <div class="mb-4">
+              <label class="block text-gray-700" for="current-password">Current Password</label>
+              <input class="w-full px-4 py-2 border rounded" id="current-password" name="oldPassword" type="password" required />
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700" for="new-password">New Password</label>
+              <input class="w-full px-4 py-2 border rounded" id="new-password" name="newPassword" type="password" required />
+            </div>
+            <div class="mb-4">
+              <label class="block text-gray-700" for="confirm-password">Confirm New Password</label>
+              <input class="w-full px-4 py-2 border rounded" id="confirm-password" type="password" required />
+            </div>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded w-full" type="submit">
+              Update Password
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Settings -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+      <h3 class="text-lg font-semibold mb-4">Notification Settings</h3>
+      <form id="notifSettingForm">
+        <div class="flex items-center mb-4">
+          <input type="checkbox" id="emailNotifications" class="mr-2" checked disabled>
+          <label for="emailNotifications" class="text-gray-700">Email Notifications</label>
+        </div>
+        <div class="flex items-center mb-4">
+          <input type="checkbox" id="WhatsappNotifications" name="whatsappNotif" class="mr-2" <%= user.whatsappNotif ? 'checked' : '' %> <%= user.plan !== 'pro' ? 'disabled' : '' %>>
+          <label for="WhatsappNotifications" class="text-gray-700">Whatsapp Notification <span class="text-xs text-gray-400">(Pro Only)</span></label>
+        </div>
+        <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">
+          Save Settings
+        </button>
+      </form>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="bg-white p-6 rounded-lg shadow-md border border-red-300">
+      <h3 class="text-lg font-semibold text-red-600 mb-4">Danger Zone</h3>
+      <p class="text-sm text-gray-600 mb-4">Permanently delete your account and all associated data.</p>
+      <form id="deleteAccountForm" action="/profile/delete-account" method="POST" ></form>
+      <button type="button" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700" id="deleteAccountBtn">
+        Delete Account
+      </button>
+    </div>
+  </div>
 </body>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll(".edit-phone").forEach((button) => {
@@ -218,74 +247,144 @@
             });
         });
 
-                document.querySelectorAll(".edit-email").forEach((button) => {
-                    button.addEventListener("click", async function() {
-                        const profileId = this.getAttribute("data-id");
+        document.querySelectorAll(".edit-email").forEach((button) => {
+            button.addEventListener("click", async function() {
+                const profileId = this.getAttribute("data-id");
 
-                        try {
-                        const response = await fetch(`/profile/get/${profileId}`, {
-                            method: "GET",
-                            headers: { "Content-Type": "application/json" },
-                        });
-
-                        if (!response.ok) {
-                            throw new Error("Failed to fetch task");
-                        }
-
-                        const profile = await response.json();
-
-                        Swal.fire({
-                            title: "Edit Email",
-                            html: `
-                            <input type="text" id="email" class="swal2-input" placeholder="Email" value="<%= user.email %>">
-                            `,
-                            showCancelButton: true,
-                            confirmButtonText: "Save",
-                            preConfirm: () => {
-                            const Email = document.getElementById("email").value.trim();
-
-                            if (!Email ) {
-                                Swal.showValidationMessage("Please enter all fields");
-                                return false;
-                            }
-
-                            return { Email };
-                            },
-                        }).then((result) => {
-                            if (result.isConfirmed && result.value) {
-                            fetch(`/profile/edit-email/${profileId}`, {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify(result.value),
-                            })
-                            .then((response) => response.json())
-                            .then((data) => {
-                                if (data.error) throw new Error(data.error);
-                                Swal.fire({
-                                icon: "success",
-                                title: "Success",
-                                text: "Email updated successfully",
-                                }).then(() => location.reload());
-                            })
-                            .catch((error) => {
-                                Swal.fire({
-                                icon: "error",
-                                title: "Error",
-                                text: error.message || "Failed to Email",
-                                });
-                            });
-                            }
-                        });
-                        } catch (error) {
-                        Swal.fire({
-                            icon: "error",
-                            title: "Error",
-                            text: error.message || "Failed to fetch Email",
-                        });
-                        }
-                    });
+                try {
+                const response = await fetch(`/profile/get/${profileId}`, {
+                    method: "GET",
+                    headers: { "Content-Type": "application/json" },
                 });
 
+                if (!response.ok) {
+                    throw new Error("Failed to fetch task");
+                }
+
+                const profile = await response.json();
+
+                Swal.fire({
+                    title: "Edit Email",
+                    html: `
+                    <input type="text" id="email" class="swal2-input" placeholder="Email" value="<%= user.email %>">
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: "Save",
+                    preConfirm: () => {
+                    const Email = document.getElementById("email").value.trim();
+
+                    if (!Email ) {
+                        Swal.showValidationMessage("Please enter all fields");
+                        return false;
+                    }
+
+                    return { Email };
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed && result.value) {
+                    fetch(`/profile/edit-email/${profileId}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(result.value),
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.error) throw new Error(data.error);
+                        Swal.fire({
+                        icon: "success",
+                        title: "Success",
+                        text: "Email updated successfully",
+                        }).then(() => location.reload());
+                    })
+                    .catch((error) => {
+                        Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: error.message || "Failed to Email",
+                        });
+                    });
+                    }
+                });
+                } catch (error) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: error.message || "Failed to fetch Email",
+                });
+                }
+            });
+        });
+
+        // Update Password
+        document.getElementById('updatePasswordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const oldPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (newPassword.length < 4) {
+                Swal.fire('Error', 'Password baru minimal 6 karakter', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                Swal.fire('Error', 'Password baru tidak cocok', 'error');
+                return;
+            }
+
+            fetch('/auth/update-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ oldPassword, newPassword, confirmPassword })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) throw new Error(data.error);
+                Swal.fire('Success', 'Password berhasil diubah', 'success').then(() => location.reload());
+            })
+            .catch(err => {
+                Swal.fire('Error', err.message || 'Gagal update password', 'error');
+            });
+        });
+
+
+        // Notification Setting
+        document.getElementById('notifSettingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const whatsappNotif = document.getElementById('WhatsappNotifications').checked;
+            fetch('/profile/notification-setting', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ whatsappNotif })
+            })
+            .then(res => res.json())
+            .then(data => {
+            if (data.error) throw new Error(data.error);
+            Swal.fire('Success', 'Pengaturan notifikasi diperbarui', 'success').then(() => location.reload());
+            })
+            .catch(err => {
+            Swal.fire('Error', err.message || 'Gagal update notifikasi', 'error');
+            });
+        });
+
+        // Delete Account
+        document.getElementById('deleteAccountBtn').addEventListener('click', function() {
+            Swal.fire({
+            title: 'Hapus akun?',
+            text: 'Akun Anda akan dihapus permanen!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+            }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('deleteAccountForm').submit();
+            }
+            });
+        });
     });
 </script>
 </html>

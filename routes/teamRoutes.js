@@ -7,6 +7,20 @@ const {sendEmailReminder} = require('../modules/mailer');
 const jwt = require('jsonwebtoken');
 const { ensureAuthenticated } = require('../middleware/authMiddleware');
 
+async function limitTeamCreation(req, res, next) {
+  try {
+    if (req.user && req.user.plan === 'basic') {
+      const teamCount = await Team.countDocuments({ members: req.user._id });
+      if (teamCount >= 1) {
+        return res.status(403).json({ error: 'Akun basic hanya bisa membuat 1 team. Upgrade ke Pro untuk fitur lebih.' });
+      }
+    }
+    next();
+  } catch (err) {
+    return res.status(500).send('Terjadi kesalahan pada pengecekan limit team.');
+  }
+}
+
 // Lihat semua tim milik user
 router.get('/', ensureAuthenticated, async (req, res) => {
     try {
@@ -23,20 +37,20 @@ router.get('/', ensureAuthenticated, async (req, res) => {
 
 
 
-router.post('/create', ensureAuthenticated, async (req, res) => {
+router.post('/create', ensureAuthenticated, limitTeamCreation, async (req, res) => {
     try {
-        const existingTeam = await Team.findOne({ leader: req.user._id });
-        const allTeams = await Team.find({ members: req.user._id }).populate('members leader');
+        // const existingTeam = await Team.findOne({ leader: req.user._id });
+        // const allTeams = await Team.find({ members: req.user._id }).populate('members leader');
         
-        const leadTeams = allTeams.filter(team => team.leader._id.equals(req.user._id));
-        const memberTeams = allTeams.filter(team => !team.leader._id.equals(req.user._id));
-        if (existingTeam) {
-            if (existingTeam) {
-                return res.status(400).json({
-                  error: 'Anda sudah menjadi leader di tim lain. Hanya diperbolehkan memiliki satu tim.'
-                });
-            }
-        }
+        // const leadTeams = allTeams.filter(team => team.leader._id.equals(req.user._id));
+        // const memberTeams = allTeams.filter(team => !team.leader._id.equals(req.user._id));
+        // if (existingTeam) {
+        //     if (existingTeam) {
+        //         return res.status(400).json({
+        //           error: 'Anda sudah menjadi leader di tim lain. Hanya diperbolehkan memiliki satu tim.'
+        //         });
+        //     }
+        // }
 
         const team = new Team({
             name: req.body.name,
@@ -82,10 +96,10 @@ router.post('/:id/add-member', ensureAuthenticated, async (req, res) => {
     try {
         const { email } = req.body;
         const team = await Team.findById(req.params.id);
-        if (!team) return res.status(404).send('❌ Tim tidak ditemukan');
+        if (!team) return res.status(404).send({error: 'Tim tidak ditemukan'});
 
         const user = await User.findOne({ email });
-        if (!user) return res.status(404).send('❌ Pengguna dengan email tersebut tidak ditemukan');
+        if (!user) return res.status(404).send({error: 'Pengguna tidak ditemukan'});
 
        
         const token = jwt.sign({ email }, process.env.JWT_SECRET, { expiresIn: '1h' });
@@ -118,11 +132,10 @@ router.post('/:id/add-member', ensureAuthenticated, async (req, res) => {
         await sendEmailReminder(user.email, subject, html, plainText);
         console.log(`✅ Undangan dikirim ke ${user.email}`);
 
-        res.render('teams/show', { team, user: req.user,  message: {
-            title: 'Undangan Terkirim!',
-            text: `Undangan berhasil dikirim ke ${user.email}.`,
-            icon: 'success'
-        } });
+        return res.status(200).json({
+            message: `Undangan berhasil dikirim ke ${user.email}.`
+        });
+        
     } catch (err) {
         console.error(err);
         res.status(500).send('❌ Gagal mengirim undangan');
@@ -249,8 +262,6 @@ router.post('/:id/add-meet', ensureAuthenticated, async (req, res) => {
             message: 'Meeting berhasil dijawlaknan.'
         });
       
-         
-
     } catch (err) {
         console.error(err);
         res.status(500).send('Terjadi kesalahan saat menjadwalkan meeting');

@@ -130,7 +130,7 @@ const checkAndSendReminders = async () => {
             for (const [userId, userTasks] of Object.entries(tasksByUser)) {
                 let profile = await Profile.findOne({ user: userId });
     
-                if (profile && profile.phoneNumber && profile.phoneVerified) {
+                if (profile && profile.phoneNumber && profile.phoneVerified && profile.whatsappNotif) {
                     let message = `🔔 *Pengingat: Kamu memiliki ${userTasks.length} tugas dengan deadline dalam ${daysBefore} hari!* 🔔\n\n`;
     
                     userTasks.forEach((task, index) => {

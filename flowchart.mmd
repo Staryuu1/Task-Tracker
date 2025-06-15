@@ -33,6 +33,13 @@ flowchart TD
         reminderService("reminder.js")
         emailService("emailer.js")
   end
+    profilePage -- "POST /profile/update-password" --> profileRoutes
+    profilePage -- "POST /profile/notification-setting" --> profileRoutes
+    profilePage -- "POST /profile/delete-account" --> profileRoutes subgraph Admin["Admin"]
+        adminDashboardPage("admin/adminDashboard.ejs")
+        adminUsersPage("admin/adminUsers.ejs")
+        adminRoutes("adminRoutes.js")
+  end
     dashboardPage -- GET /teams --> teamsIndexPage
     userEntity["user"] -- GET /auth/login --> loginPage
     userEntity -- GET /auth/register --> registerPage
@@ -62,6 +69,12 @@ flowchart TD
     teamsShowPage -- "POST /teams/:id/add-member" --> teamRoutes
     teamRoutes -- mengirim invite ke email --> emailService
     teamRoutes --> teamModel
+    adminDashboardPage -- GET /admin/dashboard --> adminRoutes
+    adminUsersPage -- GET /admin/users --> adminRoutes
+    adminUsersPage -- POST /admin/users/:id/role --> adminRoutes
+    adminUsersPage -- POST /admin/users/:id/plan --> adminRoutes
+    adminUsersPage -- POST /admin/users/:id/delete --> adminRoutes
+    adminRoutes --> userModel & taskModel & teamModel
     style loginPage fill:#ccf,stroke:#333,stroke-width:2px
     style registerPage fill:#ccf,stroke:#333,stroke-width:2px
     style authRoutes fill:#fcf,stroke:#333,stroke-width:2px
@@ -84,3 +97,6 @@ flowchart TD
     style redirectTasks fill:#cfc,stroke:#333,stroke-width:2px
     style whatsAppMessage fill:#ccf,stroke:#333,stroke-width:2px
     style emailMessage fill:#ccf,stroke:#333,stroke-width:2px
+    style adminDashboardPage fill:#ccf,stroke:#333,stroke-width:2px
+    style adminUsersPage fill:#ccf,stroke:#333,stroke-width:2px
+    style adminRoutes fill:#fcf,stroke:#333,stroke-width:2px

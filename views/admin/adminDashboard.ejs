@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard</title>
+
+  <!-- AdminLTE + Bootstrap -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+</head>
+<body class="hold-transition sidebar-mini layout-fixed">
+<div class="wrapper">
+
+  <%- include('./sidebar', { activePage: 'dashboard' }) %>
+
+  <div class="content-wrapper min-vh-100">
+    <div class="content-header">
+      <div class="container-fluid">
+        <h1 class="m-0">Admin Dashboard</h1>
+      </div>
+    </div>
+
+    <section class="content">
+      <div class="container-fluid">
+
+        <!-- Stat boxes -->
+        <div class="row">
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+              <div class="inner">
+                <h3><%= userCount %></h3>
+                <p>Total Users</p>
+              </div>
+              <div class="icon"><i class="fas fa-users"></i></div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+              <div class="inner">
+                <h3><%= taskCount %></h3>
+                <p>Total Tasks</p>
+              </div>
+              <div class="icon"><i class="fas fa-tasks"></i></div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+              <div class="inner">
+                <h3><%= teamCount %></h3>
+                <p>Total Teams</p>
+              </div>
+              <div class="icon"><i class="fas fa-users-cog"></i></div>
+            </div>
+          </div>
+
+          <div class="col-lg-3 col-6">
+            <div class="small-box bg-danger">
+              <div class="inner">
+                <h3><%= newUsersThisWeek %></h3>
+                <p>New Users This Week</p>
+              </div>
+              <div class="icon"><i class="fas fa-user-plus"></i></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart and overdue -->
+        <div class="row">
+          <div class="col-md-6">
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Task Status</h3>
+              </div>
+              <div class="card-body">
+                <canvas id="taskStatusChart" 
+                        data-completed="<%= completedTaskCount %>" 
+                        data-pending="<%= pendingTaskCount %>" 
+                        height="200"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="card card-danger">
+              <div class="card-header">
+                <h3 class="card-title">Overdue Tasks</h3>
+              </div>
+              <div class="card-body">
+                <% if (overdueTasks.length > 0) { %>
+                  <ul class="list-group">
+                    <% overdueTasks.forEach(task => { %>
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                          <strong><%= task.title %></strong> <br>
+                          <small>Due: <%= task.dueDate.toDateString() %> | User: <%= task.user?.username || 'Unknown' %></small>
+                        </span>
+                        <span class="badge badge-danger">Overdue</span>
+                      </li>
+                    <% }) %>
+                  </ul>
+                <% } else { %>
+                  <p>No overdue tasks 🎉</p>
+                <% } %>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Latest Tasks Table -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Latest Tasks</h3>
+          </div>
+          <div class="card-body p-0">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>User</th>
+                  <th>Due Date</th>
+                  <th>Priority</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% latestTasks.forEach(task => { %>
+                  <tr>
+                    <td><%= task.title %></td>
+                    <td><%= task.user?.username || 'Unknown' %></td>
+                    <td><%= task.dueDate.toDateString() %></td>
+                    <td><%= task.priority %></td>
+                    <td>
+                      <% if (task.completed) { %>
+                        <span class="badge badge-success">Completed</span>
+                      <% } else { %>
+                        <span class="badge badge-secondary">Pending</span>
+                      <% } %>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const chartEl = document.getElementById('taskStatusChart');
+  const completed = parseInt(chartEl.dataset.completed, 10);
+  const pending = parseInt(chartEl.dataset.pending, 10);
+
+  new Chart(chartEl, {
+    type: 'doughnut',
+    data: {
+      labels: ['Completed', 'Pending'],
+      datasets: [{
+        data: [completed, pending],
+        backgroundColor: ['#28a745', '#dc3545']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>

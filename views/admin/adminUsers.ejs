@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper" >
+  <%- include('./sidebar', { activePage: 'users' }) %>
+  <div class="content-wrapper min-vh-100">
+    <div class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1 class="m-0">User Management</h1>
+          </div> 
+        </div>
+      </div>
+    </div>
+    <section class="content">
+      <div class="container-fluid">
+        <div class="card" >
+          <div class="card-body">
+            <table class="table table-bordered table-hover">
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Plan</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% users.forEach(function(user) { %>
+                  <tr>
+                    <td><%= user.username %></td>
+                    <td><%= user.email %></td>
+                    <td>
+                      <form method="POST" action="/admin/users/<%= user._id %>/role" class="form-inline mb-1 update-role-form">
+                        <select name="role" class="form-control form-control-sm mr-2">
+                          <option value="user" <%= user.role === 'user' ? 'selected' : '' %>>user</option>
+                          <option value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>admin</option>
+                        </select>
+                        <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                      </form>
+                    </td>
+                    <td>
+                      <form method="POST" action="/admin/users/<%= user._id %>/plan" class="form-inline mb-1 update-plan-form">
+                        <select name="plan" class="form-control form-control-sm mr-2">
+                          <option value="basic" <%= user.plan === 'basic' ? 'selected' : '' %>>basic</option>
+                          <option value="pro" <%= user.plan === 'pro' ? 'selected' : '' %>>pro</option>
+                        </select>
+                        <button type="submit" class="btn btn-warning btn-sm">Update</button>
+                      </form>
+                    </td>
+                    <td>
+                      <form method="POST" action="/admin/users/<%= user._id %>/delete" class="delete-user-form">
+                        <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash"></i> Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  
+  document.querySelectorAll('.delete-user-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      Swal.fire({
+        title: 'Hapus user ini?',
+        text: 'Tindakan ini tidak dapat dibatalkan!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          form.submit();
+        }
+      });
+    });
+  });
+
+  
+  document.querySelectorAll('.update-role-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      Swal.fire({
+        title: 'Update Role?',
+        text: 'Yakin ingin mengubah role user ini?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'Ya, update!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          form.submit();
+        }
+      });
+    });
+  });
+
+ 
+  document.querySelectorAll('.update-plan-form').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      Swal.fire({
+        title: 'Update Plan?',
+        text: 'Yakin ingin mengubah plan user ini?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#f59e42',
+        cancelButtonColor: '#aaa',
+        confirmButtonText: 'Ya, update!',
+        cancelButtonText: 'Batal'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          form.submit();
+        }
+      });
+    });
+  });
+</script>
+<% if (typeof message !== 'undefined' && message) { %>
+<script>
+  Swal.fire({
+    title: '<%= message.title %>',
+    text: '<%= message.text %>',
+    icon: '<%= message.icon %>'
+  });
+</script>
+<% } %>
+</body>
+</html>

@@ -1,10 +1,14 @@
 const express = require("express");
 const User = require('../models/User');
-const Profile = require("../models/Profile");
+const Task = require('../models/Task');
+const Notes = require('../models/Notes');
+const Profile = require('../models/Profile');
+const Team = require('../models/Team');
 const { ensureAuthenticated } = require("../middleware/authMiddleware");
 const {sendWhatsAppMessage} = require('../modules/reminder');
 const {sendEmailReminder} = require('../modules/mailer');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcryptjs');
 const router = express.Router();
 require('dotenv').config();
 
@@ -183,4 +187,45 @@ router.get("/verify-email/:token", async (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
     }
 });
+
+// Notification Setting (WhatsApp only for Pro)
+router.post('/notification-setting', ensureAuthenticated, async (req, res) => {
+  if (req.user.plan !== 'pro' && req.body.whatsappNotif) {
+    return res.status(400).json({ error: 'WhatsApp notif hanya untuk akun Pro.' });
+  }
+  await Profile.findByIdAndUpdate(req.user._id, { whatsappNotif: !!req.body.whatsappNotif });
+  res.json({ success: true });
+});
+
+// Delete Account
+router.post('/delete-account', ensureAuthenticated, async (req, res, next) => {
+  const userId = req.user._id;
+
+  try {
+    await Promise.all([
+      User.findByIdAndDelete(userId),
+      Task.deleteMany({ user: userId }),
+      Notes.deleteMany({ user: userId }),
+      Profile.deleteMany({ user: userId }),
+      Team.updateMany({ members: userId }, { $pull: { members: userId } }),
+      Team.deleteMany({ leader: userId })
+    ]);
+
+    req.logout(err => {
+        if (err) return next(err);
+        res.render('login', {
+            message: {
+            title: 'Akun dihapus',
+            text: 'Akun Anda berhasil dihapus.',
+            icon: 'success'
+            }
+        });
+    });
+  } catch (error) {
+    console.error('Error deleting account:', error);
+    res.status(500).send('Terjadi kesalahan saat menghapus akun.');
+  }
+});
+
+
 module.exports = router;

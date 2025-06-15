@@ -42,6 +42,7 @@ app.use('/auth', require('./routes/authRoutes'));
 app.use('/tasks', require('./routes/taskRoutes'));
 app.use('/profile', require('./routes/profileRoutes'));
 app.use('/teams', require('./routes/teamRoutes'));
+app.use('/admin', require('./routes/adminRoutes'));
 
 app.get('/', (req, res) => {
     if (!req.isAuthenticated()) return res.redirect('/auth/login');
@@ -58,7 +59,6 @@ app.get('/qrcode', (req, res) => {
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).render('error', { message: 'Something went wrong!' });
 });
 
 client.initialize();

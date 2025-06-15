@@ -34,3 +34,8 @@ build/
 .wwebjs_auth/
 .wwebjs_cache
 modules/public/qr.png
+
+
+#old files
+Dashboard-old.ejs
+Profile-old.ejs

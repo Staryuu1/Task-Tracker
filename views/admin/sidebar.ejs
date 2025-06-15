@@ -1,0 +1,24 @@
+<!-- views/admin/_sidebar.ejs -->
+<aside class="main-sidebar sidebar-dark-primary elevation-4" style="min-height: 100vh;">
+  <a href="/admin/dashboard" class="brand-link">
+    <span class="brand-text font-weight-light">AdminLTE</span>
+  </a>
+  <div class="sidebar">
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
+        <li class="nav-item">
+          <a href="/admin/dashboard" class="nav-link <%= (activePage === 'dashboard') ? 'active' : '' %>">
+            <i class="nav-icon fas fa-tachometer-alt"></i>
+            <p>Dashboard</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/admin/users" class="nav-link <%= (activePage === 'users') ? 'active' : '' %>">
+            <i class="nav-icon fas fa-users"></i>
+            <p>User Management</p>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+</aside>
