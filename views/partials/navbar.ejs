@@ -1,0 +1,36 @@
+<nav class="flex justify-between items-center w-full px-4 py-4 bg-white shadow mb-8 rounded-b-xl">
+  <div class="flex items-center gap-2">
+    <i class="fas text-blue-600 text-2xl"></i>
+    <% if (isLoggedIn) { %>
+    <a href="/tasks" class="font-bold text-xl text-blue-700">Task Tracker</a>
+    <% } else { %>
+    <a href="/" class="font-bold text-xl text-blue-700">Task Tracker</a>
+    <% } %>
+  </div>
+
+  <div class="flex items-center space-x-6">
+    <% if (isLoggedIn) { %>
+        <% if (currentPath === '/tasks') { %>
+            <a href="/teams" class="text-gray-800 hover:text-blue-700 font-medium">Team</a>
+            <a href="/profile" class="text-gray-800 hover:text-blue-700 font-medium">Profile</a>
+            <a href="/auth/logout" class="text-gray-800 hover:text-red-600 font-medium">Logout</a>
+        <% } else if (currentPath == '/teams' || currentPath == '/profile') { %>
+            <a href="/tasks" class="text-gray-800 hover:text-blue-700 font-medium">Home</a>
+            <a href="/auth/logout" class="text-gray-800 hover:text-red-600 font-medium">Logout</a>
+        <% } else if (currentPath.startsWith('/teams/')){%>
+            <a href="/tasks" class="text-gray-800 hover:text-blue-700 font-medium">Home</a>
+             <a href="/teams" class="text-gray-800 hover:text-blue-700 font-medium">Team</a>
+            <a href="/auth/logout" class="text-gray-800 hover:text-red-600 font-medium">Logout</a>
+        <% } else { %>
+            <a href="/tasks" class="text-gray-800 hover:text-blue-700 font-medium">Dashboard</a>
+            <a href="/auth/logout" class="text-gray-800 hover:text-red-600 font-medium">Logout</a>
+        <% } %>
+    <% } else { %>
+      <a href="/auth/login" class="text-gray-800 hover:text-blue-700 font-medium">Login</a>
+      <a href="/auth/register" class="text-gray-800 hover:text-blue-700 font-medium">Register</a>
+    <% } %>
+    <% if (isAdmin) { %>
+        <a href="/admin/dashboard" class="text-gray-800 hover:text-blue-700 font-medium">Admin</a>
+    <% } %>
+  </div>
+</nav>

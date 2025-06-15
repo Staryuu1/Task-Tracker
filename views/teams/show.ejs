@@ -8,25 +8,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-gradient-to-br from-blue-100 to-blue-300 min-h-screen text-gray-900 p-6">
-  <!-- <div class="mb-4">
-    <button onclick="window.location.href='/teams'" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-      ← Kembali
-    </button>
-  </div> -->
-  <div class="container mx-auto">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Detail Tim</h1>
-      <div>
-        <a href="/teams" class="text-gray-600 hover:text-gray-800 mr-4">Teams</a>
-        <a href="/tasks" class="text-gray-600 hover:text-gray-800 mr-4">Home</a>
-        <a href="/auth/logout" class="text-gray-600 hover:text-gray-800">Logout</a>
-      </div>
-    </div>
-  </div>
+<body class="bg-gradient-to-br from-blue-100 to-blue-300 min-h-screen text-gray-900 ">
+    <%- include('../partials/navbar') %>
   <div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
-     <!-- Header -->
-
     <!-- Nama Tim -->
     <h2 class="text-2xl font-bold text-gray-800 mb-4"><%= team.name %></h2>
     <p class="text-gray-600 mb-4"><%= team.description %></p>
@@ -39,7 +23,7 @@
         <li class="bg-gray-50 p-2 rounded-md shadow-sm hover:bg-gray-100 transition-colors"><%= member.username %></li>
       <% }) %>
     </ul>
-<!-- action="/teams/<%= team._id %>/add-member" method="POST" -->
+
     <!-- div Tambah Anggota (Hanya untuk Leader) -->
     <% if (team.leader._id.toString() === user._id.toString()) { %>
       <h3 class="text-lg font-semibold text-gray-800 mt-6 mb-2">Tambah Anggota</h3>
