@@ -36,7 +36,14 @@ app.use(
 
 app.use(passport.initialize());
 app.use(passport.session());
-
+// app.js atau sebelum route
+app.use((req, res, next) => {
+  res.locals.isLoggedIn = req.isAuthenticated(); 
+  res.locals.currentUser = req.user || null;     
+  res.locals.isAdmin = req.user && req.user.role === 'admin';
+  res.locals.currentPath = req.path
+  next();
+});
 
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/tasks', require('./routes/taskRoutes'));
@@ -45,9 +52,12 @@ app.use('/teams', require('./routes/teamRoutes'));
 app.use('/admin', require('./routes/adminRoutes'));
 
 app.get('/', (req, res) => {
-    if (!req.isAuthenticated()) return res.redirect('/auth/login');
-    res.redirect('/tasks');
+  res.render('landing');
 });
+
+
+
+
 app.get('/qrcode', (req, res) => {
     const filePath = path.join(__dirname, 'modules', 'public', 'qr.png');
     if (fs.existsSync(filePath)) {

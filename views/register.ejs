@@ -18,24 +18,25 @@
     }
   </style>
 </head>
-<body>
-  <div class="min-h-screen flex items-center justify-center" style="background: linear-gradient(90deg, var(--color-primary-lighter) 0%, var(--color-primary) 100%)">
-    <div class="bg-white rounded-3xl w-[350px] max-w-full p-8 flex flex-col items-center">
-      <h1 class="font-semibold text-xl mb-8" style="color: var(--color-primary);">Registrasi</h1>
-      <form class="w-full flex flex-col gap-4" action="/auth/register" method="POST">
-        <input type="text" name="username" placeholder="Username" required class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" />
-        <input type="email" name="email" placeholder="Email" required class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" />
-        <input type="password" name="password" placeholder="Masukkan Password" required class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" />
-        <input type="password" name="password2" placeholder="Ulangi Password" required class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" />
-        <button type="submit" class="rounded-lg py-3 text-white text-sm mt-2" style="background-color: var(--color-primary-light)">Register</button>
-      </form>
-      <p class="text-sm mt-10 text-center text-gray-900">
-        Sudah punya akun?
-        <a href="/auth/login" class="hover:underline" style="color: var(--color-primary-light)">Login sekarang</a>
-      </p>
-    </div>
+<body class="bg-gradient-to-b from-blue-100 to-blue-300 min-h-screen flex flex-col">
+   <%- include('partials/navbar') %>
+  <div class="flex flex-col justify-center items-center flex-grow">
+     <div class="bg-white rounded-3xl w-[350px] max-w-full p-8 flex flex-col items-center">
+        <h1 class="font-semibold text-xl mb-8" style="color: var(--color-primary);">Registrasi</h1>
+        <form class="w-full flex flex-col gap-4" action="/auth/register" method="POST">
+          <input type="text" name="username" placeholder="Username" required class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" />
+          <input type="email" name="email" placeholder="Email" required class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" />
+          <input type="password" name="password" placeholder="Masukkan Password" required class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" />
+          <input type="password" name="password2" placeholder="Ulangi Password" required class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" />
+          <button type="submit" class="rounded-lg py-3 text-white text-sm mt-2" style="background-color: var(--color-primary-light)">Register</button>
+        </form>
+        <p class="text-sm mt-10 text-center text-gray-900">
+          Sudah punya akun?
+          <a href="/auth/login" class="hover:underline" style="color: var(--color-primary-light)">Login sekarang</a>
+        </p>
+      </div>
   </div>
-
+ 
   <% if (typeof message !== 'undefined' && message) { %>
     <script>
       Swal.fire({

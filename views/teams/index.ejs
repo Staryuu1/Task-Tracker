@@ -7,22 +7,9 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-gradient-to-br from-blue-100 to-blue-300 min-h-screen text-gray-900 p-6">
-  <!-- <div class="mb-4">
-    <button onclick="window.location.href='/tasks'" class="flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-      ← Kembali
-    </button>
-  </div> -->
+<body class="bg-gradient-to-br from-blue-100 to-blue-300 min-h-screen text-gray-900 ">
+   <%- include('../partials/navbar') %>
   <div class="container mx-auto">
-    
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Teams</h1>
-      <div>
-        <a href="/tasks" class="text-gray-600 hover:text-gray-800 mr-4">Home</a>
-        <a href="/auth/logout" class="text-gray-600 hover:text-gray-800">Logout</a>
-      </div>
-    </div>
-
     <h2 class="text-xl font-bold mb-4 text-gray-800">👑 Tim yang Saya Pimpin</h2>
     <div class="bg-white p-4 rounded-lg shadow-md mb-6">
       <% if (leadTeams.length === 0) { %>

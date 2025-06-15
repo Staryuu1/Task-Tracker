@@ -8,17 +8,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 </head>
 <body class="bg-gradient-to-br from-blue-100 to-blue-300 text-gray-900 min-h-screen">
+    <%- include('partials/navbar') %>
   <div class="container mx-auto p-6">
-    <!-- Header -->
-    <nav class="flex justify-between items-center mb-6">
-      <h1 class="text-3xl font-bold">Task Tracker</h1>
-      <div class="flex items-center space-x-6">
-        <a href="/teams" class="text-gray-800 hover:text-blue-700 font-medium">Teams</a>
-        <a href="/profile" class="text-gray-800 hover:text-blue-700 font-medium">Profile</a>
-        <a href="/auth/logout" class="text-gray-800 hover:text-blue-700 font-medium">Logout</a>
-      </div>
-    </nav>
-
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <% const total = tasks.length; const completed = tasks.filter(task => task.completed).length; %>

@@ -5,29 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+    }
+    :root {
+      --color-primary: #3674B5;
+      --color-primary-light: #578FCA;
+      --color-primary-lighter: #A1E3F9;
+      --color-primary-lightest: #D1F8EF;
+    }
+  </style>
 </head>
-<body class="flex justify-center items-center h-screen bg-gray-100">
-    <div class="w-96 p-6 bg-white rounded shadow">
-        <h2 class="text-2xl font-bold mb-4">Login</h2>
-        <form action="/auth/login" method="POST">
-            <input type="text" name="username" class="border p-2 w-full mb-2" placeholder="Username" required>
-            <input type="password" name="password" class="border p-2 w-full mb-2" placeholder="Password" required>
-            <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded w-full">Login</button>
-        </form>
-        <p class="text-center mt-2">Belum punya akun? <a href="/auth/register" class="text-blue-500">Register</a></p>
+<body class="bg-gradient-to-b from-blue-100 to-blue-300 min-h-screen flex flex-col">
+  <%- include('partials/navbar') %>
+  <div class="flex-1 flex flex-col justify-center items-center">
+    <div class="bg-white rounded-3xl w-[350px] max-w-full p-8 flex flex-col items-center">
+      <h2 class="font-semibold text-xl mb-8" style="color: var(--color-primary);">Login</h2>
+      <form class="w-full flex flex-col gap-4" action="/auth/login" method="POST">
+        <input type="text" name="username" class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" placeholder="Username" required>
+        <input type="password" name="password" class="border border-gray-600 rounded-lg px-4 py-3 text-sm focus:outline-none" placeholder="Password" required>
+        <button type="submit" class="rounded-lg py-3 text-white text-sm mt-2" style="background-color: var(--color-primary-light)">Login</button>
+      </form>
+      <p class="text-sm mt-10 text-center text-gray-900">Belum punya akun? <a href="/auth/register" class="hover:underline" style="color: var(--color-primary-light)">Register</a></p>
     </div>
-    
+  </div>
+  <% if (typeof message !== 'undefined' && message) { %>
+  <script>
+    Swal.fire({
+      title: '<%= message.title %>',
+      text: '<%= message.text %>',
+      icon: '<%= message.icon %>',
+      confirmButtonText: 'OK'
+    });
+  </script>
+  <% } %>
 </body>
-<% if (typeof message !== 'undefined' && message) { %>
-<script>
-  Swal.fire({
-    title: '<%= message.title %>',
-    text: '<%= message.text %>',
-    icon: '<%= message.icon %>',
-    confirmButtonText: 'OK'
-  });
-</script>
-<% } %>
-
 </html>
