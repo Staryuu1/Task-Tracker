@@ -16,18 +16,20 @@ require('dotenv').config();
 router.get("/", ensureAuthenticated, async (req, res) => {
     try {
         let profile = await Profile.findOne({ user: req.user._id });
-
       
         if (!profile) {
             profile = new Profile({
                 user: req.user._id,
                 name: req.user.username,
-                phoneNumber: "0", 
+                phoneNumber: "0",
+                phoneVerified:false,
+                emailVerified: false,
+                whatsappNotif: false
             });
 
             await profile.save();
         }
-
+       
         res.render("Profile", { user: req.user, profile: profile });
     } catch (err) {
         console.error(err);
@@ -193,8 +195,10 @@ router.post('/notification-setting', ensureAuthenticated, async (req, res) => {
   if (req.user.plan !== 'pro' && req.body.whatsappNotif) {
     return res.status(400).json({ error: 'WhatsApp notif hanya untuk akun Pro.' });
   }
-  await Profile.findByIdAndUpdate(req.user._id, { whatsappNotif: !!req.body.whatsappNotif });
-  res.json({ success: true });
+  
+  await Profile.findOneAndUpdate({ user: req.user._id },{ whatsappNotif: !!req.body.whatsappNotif }
+);
+  res.status(200).json({ message: "Berhasil" });
 });
 
 // Delete Account

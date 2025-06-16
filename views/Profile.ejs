@@ -78,7 +78,8 @@
           <label for="emailNotifications" class="text-gray-700">Email Notifications</label>
         </div>
         <div class="flex items-center mb-4">
-          <input type="checkbox" id="WhatsappNotifications" name="whatsappNotif" class="mr-2" <%= user.whatsappNotif ? 'checked' : '' %> <%= user.plan !== 'pro' ? 'disabled' : '' %>>
+          <input type="checkbox" id="WhatsappNotifications" name="whatsappNotif" class="mr-2" <%= profile.whatsappNotif ? 'checked' : '' %> <%= user.plan !== 'pro' ? 'disabled' : '' %>>
+          <h1></h1>
           <label for="WhatsappNotifications" class="text-gray-700">Whatsapp Notification <span class="text-xs text-gray-400">(Pro Only)</span></label>
         </div>
         <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded">
