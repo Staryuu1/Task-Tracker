@@ -35,11 +35,10 @@ router.post('/register', async (req, res) => {
             });
         }
 
-        
         const hashedPassword = await bcrypt.hash(password, 10);
 
         
-        const user = new User({ username, email, password: hashedPassword, role: 'user', plan: 'basic' });
+        const user = new User({ username, email, password: hashedPassword, role: 'user', plan: 'basic', upgradeDate: null, planExpired: null});
         await user.save();
 
         res.render('register', {

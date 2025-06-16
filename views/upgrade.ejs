@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upgrade Plan - Task Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-100 to-blue-300 min-h-screen flex flex-col">
+  <%- include('partials/navbar') %>
+  <div class="flex-1 flex flex-col justify-center items-center">
+    <div class="bg-white rounded-xl shadow p-8 w-full max-w-md mt-8">
+      <h2 class="text-2xl font-bold mb-2 text-center text-blue-700">Upgrade ke Pro</h2>
+      <p class="text-center text-gray-600 mb-6">hanya dengan 50k/bulan, Nikmati fitur premium seperti WhatsApp Notif, multi-team!</p>
+      <% if (user.plan === 'pro') { %>
+        <div class="bg-green-100 text-green-700 p-4 rounded mb-4 text-center">
+          <i class="fas fa-crown mr-2"></i> Akun Anda sudah Pro sejak <%= user.upgradeDate ? user.upgradeDate.toLocaleDateString('id-ID') : '-' %>
+        </div>
+      <% } else { %>
+        <ul class="mb-6 text-gray-700 list-disc pl-6">
+          <li>Notifikasi WhatsApp untuk deadline</li>
+          <li>Buat & kelola banyak tim</li>
+        </ul>
+        <button id="payProBtn" class="bg-blue-600 text-white px-6 py-3 rounded-lg w-full font-semibold text-lg hover:bg-blue-700 transition">Upgrade Sekarang - Rp 50.000</button>
+      <% } %>
+    </div>
+  </div>
+  <% if (user.plan !== 'pro') { %>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="<%= midtransClientKey %>"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script type="text/javascript">
+      document.addEventListener('DOMContentLoaded', function() {
+        var payBtn = document.getElementById('payProBtn');
+        if (payBtn) {
+            function pollCheckStatus(attempt = 0) {
+                fetch('/upgrade/check-status')
+                    .then(res => res.json())
+                    .then(data => {
+                    if (data.status === 'settlement' || data.status === 'capture') {
+                        Swal.fire('Berhasil!', 'Upgrade ke Pro berhasil. Silakan login ulang.', 'success')
+                        .then(() => window.location.reload());
+                    } else if (attempt < 5) {
+                        setTimeout(() => pollCheckStatus(attempt + 1), 2000); // Coba lagi setelah 2 detik
+                    } else {
+                        Swal.fire('Menunggu konfirmasi', 'Pembayaran Anda sedang diproses. Silakan cek kembali beberapa saat lagi.', 'info');
+                    }
+                });
+            }
+
+            payBtn.onclick = function() {
+                fetch('/upgrade/midtrans-token', { method: 'POST' })
+                    .then(res => res.json())
+                    .then(data => {
+                    if (data.token) {
+                        window.snap.pay(data.token, {
+                        onSuccess: function(result) {
+                            pollCheckStatus();
+                        },
+                        onPending: function(result) {
+                            Swal.fire('Menunggu pembayaran', 'Selesaikan pembayaran untuk upgrade ke Pro.', 'info');
+                        },
+                        onError: function(result) {
+                            Swal.fire('Gagal', 'Terjadi kesalahan pembayaran.', 'error');
+                        },
+                        onClose: function() {}
+                        });
+                    } else {
+                        Swal.fire('Gagal', 'Tidak bisa memulai pembayaran.', 'error');
+                    }
+                });
+            };
+        }
+      });
+    </script>
+  <% } %>
+</body>
+</html>

@@ -11,6 +11,8 @@ const {client} = require('./modules/reminder');
 const {checkAndSendEmailReminders} = require('./modules/mailer');
 require('./config/passport')(passport);
 
+const User = require('./models/User');
+
 const app = express();
 
 
@@ -45,11 +47,25 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(async (req, res, next) => {
+  if (req.isAuthenticated() && req.user.plan === 'pro' && req.user.planExpired) {
+    if (req.user.planExpired < new Date()) {
+      await User.findByIdAndUpdate(req.user._id, { plan: 'basic', planExpired: null, upgradeDate: null });
+      req.user.plan = 'basic';
+      req.user.planExpired = null;
+      req.user.upgradeDate = null;
+    }
+  }
+  next();
+});
+
+
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/tasks', require('./routes/taskRoutes'));
 app.use('/profile', require('./routes/profileRoutes'));
 app.use('/teams', require('./routes/teamRoutes'));
 app.use('/admin', require('./routes/adminRoutes'));
+app.use('/upgrade', require('./routes/upgradeRoutes'));
 
 app.get('/', (req, res) => {
   res.render('landing');
@@ -73,5 +89,8 @@ app.use((err, req, res, next) => {
 
 client.initialize();
 checkAndSendEmailReminders()
+
+
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
