@@ -91,7 +91,7 @@ router.get('/check-status', ensureAuthenticated, async (req, res) => {
 router.post('/midtrans-notification', async (req, res) => {
   try {
     const notif = await snap.transaction.notification(req.body);
-
+    console.log('Midtrans notification received:', req.body);
     const trx = await Transaction.findOneAndUpdate(
       { orderId: notif.order_id },
       { status: notif.transaction_status },
