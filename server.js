@@ -11,6 +11,9 @@ const {client} = require('./modules/reminder');
 const {checkAndSendEmailReminders} = require('./modules/mailer');
 require('./config/passport')(passport);
 
+const globalMiddleware = require('./middleware/globals');
+const checkExpiredPlan = require('./middleware/planChecker');
+
 const User = require('./models/User');
 
 const app = express();
@@ -39,26 +42,8 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 // app.js atau sebelum route
-app.use((req, res, next) => {
-  res.locals.isLoggedIn = req.isAuthenticated(); 
-  res.locals.currentUser = req.user || null;     
-  res.locals.isAdmin = req.user && req.user.role === 'admin';
-  res.locals.currentPath = req.path
-  next();
-});
-
-app.use(async (req, res, next) => {
-  if (req.isAuthenticated() && req.user.plan === 'pro' && req.user.planExpired) {
-    if (req.user.planExpired < new Date()) {
-      await User.findByIdAndUpdate(req.user._id, { plan: 'basic', planExpired: null, upgradeDate: null });
-      req.user.plan = 'basic';
-      req.user.planExpired = null;
-      req.user.upgradeDate = null;
-    }
-  }
-  next();
-});
-
+app.use(globalMiddleware);        
+app.use(checkExpiredPlan); 
 
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/tasks', require('./routes/taskRoutes'));

@@ -2,8 +2,17 @@ const express = require("express");
 const User = require("../models/User");
 const Task = require("../models/Task");
 const Team = require("../models/Team");
-const os = require('os');
+const midtransClient = require('midtrans-client');
+const Transaction = require('../models/Transaction');
+
 const router = express.Router();
+
+const snap = new midtransClient.Snap({
+  isProduction: false,
+  serverKey: process.env.MIDTRANS_SERVER_KEY,
+  clientKey: process.env.MIDTRANS_CLIENT_KEY
+});
+
 
 // Middleware: Batasi hanya untuk admin (contoh, sesuaikan dengan field role di User)
 function ensureAdmin(req, res, next) {
@@ -14,7 +23,7 @@ function ensureAdmin(req, res, next) {
 }
 
 
-router.get("/dashboard", ensureAdmin, async (req, res) => {
+router.get("/", ensureAdmin, async (req, res) => {
   try {
     const [userCount, taskCount, teamCount] = await Promise.all([
       User.countDocuments(),
@@ -109,8 +118,71 @@ router.post("/users/:id/delete", ensureAdmin, async (req, res) => {
   }
 });
 
+router.get("/transactions", ensureAdmin, async (req, res) => {
+  try {
+    const { search } = req.query;
 
+    const query = {};
+    if (search) {
+      const regex = new RegExp(search, "i");
+      query.$or = [
+        { orderId: regex },
+        { status: regex },
+        { userId: { $in: await User.find({ $or: [{ username: regex }, { email: regex }] }).distinct('_id') } }
+      ];
+    }
 
+    const transactions = await Transaction.find(query)
+      .populate("userId", "username email")
+      .sort({ createdAt: -1 })
+      .limit(50);
 
+    res.render("admin/adminTransactions", { transactions, search });
+  } catch (err) {
+    console.error("Error loading transactions:", err);
+    res.status(500).send("Gagal memuat transaksi.");
+  }
+});
+
+router.post('/check-status/:trxId', ensureAdmin, async (req, res) => {
+  try {
+    const trx = await Transaction.findById(req.params.trxId).populate('userId');
+    if (!trx) return res.status(404).send('Transaksi tidak ditemukan.');
+    console.log(`Memeriksa status transaksi: ${trx.orderId}`);
+    if (trx.status == 'pending') {
+      const statusResponse = await snap.transaction.status(trx.orderId);
+      trx.status = statusResponse.transaction_status;
+      await trx.save();
+
+      if (trx.status === 'settlement' || trx.status === 'capture') {
+        const now = new Date();
+        const expired = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+        await User.findByIdAndUpdate(trx.userId._id, {
+          plan: 'pro',
+          upgradeDate: now,
+          planExpired: expired
+        });
+        
+        return res.json({
+          title: 'Berhasil',
+          message: `Status transaksi ${trx.orderId} berhasil diperbarui".`,
+          icon: 'success'
+        });
+      }
+    }
+    return res.json({
+      title: 'Gagal',
+      message: `Status Transaksi ${trx.orderId} Tidak Pending`,
+      icon: 'error'
+    });
+    
+  } catch (err) {
+      return res.status(500).json({
+        title: 'Gagal Memeriksa Status',
+        message: 'Terjadi kesalahan saat memeriksa ulang status transaksi.',
+        icon: 'error'
+      });
+  }
+});
 
 module.exports = router;

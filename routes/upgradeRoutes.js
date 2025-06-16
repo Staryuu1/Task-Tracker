@@ -2,7 +2,6 @@ const express = require('express');
 const router = express.Router();
 const midtransClient = require('midtrans-client');
 const User = require('../models/User');
-const Profile = require('../models/Profile');
 const Transaction = require('../models/Transaction');
 const { ensureAuthenticated } = require('../middleware/authMiddleware');
 
@@ -33,7 +32,7 @@ router.post('/midtrans-token', ensureAuthenticated, async (req, res) => {
     }
     const parameter = {
       transaction_details: {
-        order_id: 'order-' + Date.now() + '-' + req.user._id,
+        order_id: 'pro-' + Date.now() + '-' + req.user._id,
         gross_amount: 50000
       },
       customer_details: {
@@ -88,7 +87,7 @@ router.get('/check-status', ensureAuthenticated, async (req, res) => {
 });
 
 
-router.post('/midtrans-notification', async (req, res) => {
+router.post('/midtrans-webhook', async (req, res) => {
   try {
     const notif = await snap.transaction.notification(req.body);
     console.log('Midtrans notification received:', req.body);
@@ -109,7 +108,7 @@ router.post('/midtrans-notification', async (req, res) => {
             { new: true }
         );
     }
-    res.status(200).send('OK');
+    res.sendStatus(200); 
   } catch (err) {
     console.error('Midtrans notification error:', err);
     res.status(500).send('Error');
@@ -117,3 +116,4 @@ router.post('/midtrans-notification', async (req, res) => {
 });
 
 module.exports = router;
+

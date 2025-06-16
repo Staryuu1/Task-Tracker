@@ -7,7 +7,7 @@
     <nav class="mt-2">
       <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu">
         <li class="nav-item">
-          <a href="/admin/dashboard" class="nav-link <%= (activePage === 'dashboard') ? 'active' : '' %>">
+          <a href="/admin/" class="nav-link <%= (activePage === 'dashboard') ? 'active' : '' %>">
             <i class="nav-icon fas fa-tachometer-alt"></i>
             <p>Dashboard</p>
           </a>
@@ -16,6 +16,12 @@
           <a href="/admin/users" class="nav-link <%= (activePage === 'users') ? 'active' : '' %>">
             <i class="nav-icon fas fa-users"></i>
             <p>User Management</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="/admin/transactions" class="nav-link <%= (activePage === 'transactions') ? 'active' : '' %>">
+            <i class="nav-icon fas fa-credit-card"></i>
+            <p>Transaction</p>
           </a>
         </li>
       </ul>
