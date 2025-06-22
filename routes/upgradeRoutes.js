@@ -70,7 +70,6 @@ router.get('/check-status', ensureAuthenticated, async (req, res) => {
 
    
     if (trx.status === 'settlement' || trx.status === 'capture') {
-        console.log('Upgrading user to Pro plan');
         const now = new Date();
         const expired = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
         await User.findByIdAndUpdate(
@@ -89,31 +88,37 @@ router.get('/check-status', ensureAuthenticated, async (req, res) => {
 
 router.post('/midtrans-webhook', async (req, res) => {
   try {
-    const notif = await snap.transaction.notification(req.body);
-    console.log('Midtrans notification received:', req.body);
+    const { order_id } = req.body;
+
+
+    const notif = await snap.transaction.status(order_id); 
+
+
     const trx = await Transaction.findOneAndUpdate(
       { orderId: notif.order_id },
       { status: notif.transaction_status },
       { new: true }
     );
-    
+
     if (notif.transaction_status === 'settlement' || notif.transaction_status === 'capture') {
       const userId = trx ? trx.userId : notif.order_id.split('-').pop();
       const now = new Date();
-      const expired = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000); 
-    
-        await User.findByIdAndUpdate(
-            userId,
-            { plan: 'pro', upgradeDate: now, planExpired: expired },
-            { new: true }
-        );
+      const expired = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      await User.findByIdAndUpdate(
+        userId,
+        { plan: 'pro', upgradeDate: now, planExpired: expired },
+        { new: true }
+      );
     }
-    res.sendStatus(200); 
+
+    res.sendStatus(200);
   } catch (err) {
-    console.error('Midtrans notification error:', err);
+    console.error('Midtrans notification error:', err.message);
     res.status(500).send('Error');
   }
 });
+
 
 module.exports = router;
 
