@@ -2,10 +2,12 @@ require('dotenv').config();
 const fs = require("fs");
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const {openRouterCall} = require('./aiHandler');
+
 const qrcode = require('qrcode');
 const cron = require('node-cron');
 const mongoose = require('mongoose');
 const Task = require('../models/Task');
+const Team = require('../models/Team');
 const Profile = require("../models/Profile");
 const path = require("path");
 const AiSession = require('../models/AiSession');
@@ -212,6 +214,8 @@ const sendWhatsAppMessage = async (phoneNumber, message) => {
     }
 };
 
+
+
 const checkAndSendReminders = async () => {
     console.log('🔍 Mengecek tugas yang jatuh tempo...');
 
@@ -222,64 +226,90 @@ const checkAndSendReminders = async () => {
             now.getUTCMonth(),
             now.getUTCDate()
         ));
-        today.setHours(0, 0, 0, 0); 
-    
+        today.setHours(0, 0, 0, 0);
+
         const reminderDays = [4, 3, 2, 1];
+
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
             reminderDate.setDate(today.getDate() + daysBefore);
-            reminderDate.setHours(0, 0, 0, 0); 
-    
+            reminderDate.setHours(0, 0, 0, 0);
+
             const nextDay = new Date(reminderDate);
             nextDay.setDate(reminderDate.getDate() + 1);
-            nextDay.setHours(0, 0, 0, 0); 
-    
+            nextDay.setHours(0, 0, 0, 0);
+
             console.log(`🔎 Mencari tugas antara ${reminderDate.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })} - ${nextDay.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}`);
-    
+
             const tasks = await Task.find({
                 dueDate: { $gte: reminderDate, $lt: nextDay },
                 completed: false
             });
-    
+
             console.log(`📋 Ditemukan ${tasks.length} tugas.`);
-            
-            
+
             const tasksByUser = {};
-    
+
             for (const task of tasks) {
                 if (!tasksByUser[task.user]) {
                     tasksByUser[task.user] = [];
                 }
                 tasksByUser[task.user].push(task);
             }
-    
+
             for (const [userId, userTasks] of Object.entries(tasksByUser)) {
-                let profile = await Profile.findOne({ user: userId });
-    
+                const profile = await Profile.findOne({ user: userId });
+
                 if (profile && profile.phoneNumber && profile.phoneVerified && profile.whatsappNotif) {
                     let message = `🔔 *Pengingat: Kamu memiliki ${userTasks.length} tugas dengan deadline dalam ${daysBefore} hari!* 🔔\n\n`;
-    
+
                     userTasks.forEach((task, index) => {
                         message += `📌 *${index + 1}. ${task.title}*\n📅 *Deadline:* ${task.dueDate.toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' })}\n📝 *Deskripsi:* ${task.description}\n\n`;
                     });
-    
+
                     message += `🚀 Segera selesaikan tugas-tugas ini agar tidak terlambat! ✅`;
-    
+
                     await sendWhatsAppMessage(profile.phoneNumber, message);
                     console.log(`📨 Mengirim pesan ke ${profile.phoneNumber} (${userTasks.length} tugas)`);
                 } else {
                     console.log(`⚠️ User ${userId} tidak memiliki nomor telepon terverifikasi.`);
                 }
+
+               
+                for (const task of userTasks) {
+                    console.log(task.category);
+                    if (task.category?.toLowerCase() === 'team') {
+                        const teams = await Team.find({ tasks: task._id }).populate('members');
+                        console.log(`👥 Ditemukan ${teams.length} tim untuk tugas ini.`);
+                        
+                        for (const team of teams) {
+                            for (const member of team.members) {
+                                if (String(member._id) === String(userId)) continue; 
+                                
+                                const memberProfile = await Profile.findOne({ user: member._id });
+
+                                if (memberProfile && memberProfile.phoneNumber && memberProfile.phoneVerified && memberProfile.whatsappNotif) {
+                                    let msg = `👥 *Pengingat Tugas Tim:*\n\n📌 *${task.title}*\n📅 *Deadline:* ${task.dueDate.toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' })}\n📝 *Deskripsi:* ${task.description}\n\n🚀 Harap bantu menyelesaikan tugas ini tepat waktu.`;
+
+                                    await sendWhatsAppMessage(memberProfile.phoneNumber, msg);
+                                    console.log(`📨 Reminder dikirim ke anggota tim (${memberProfile.phoneNumber})`);
+                                } else {
+                                    console.log(`⚠️ Anggota tim ${member._id} tidak memiliki profil yang valid atau WhatsApp dinonaktifkan.`);
+                                }
+                            }
+                        }
+                    }
+
+                }
             }
-    
+
             console.log(`✅ Pengingat selesai dikirim untuk tugas yang deadline dalam ${daysBefore} hari.`);
         }
     } catch (error) {
         console.error('❌ Gagal mengecek tugas:', error);
     }
-    
-    
 };
+
 
 
 cron.schedule('0 6 * * *', async () => {

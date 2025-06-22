@@ -95,6 +95,28 @@
       </div>
     </div>
   <% } %>
+
+<!-- Danger Zone: Delete & Quit Team (as a Card) -->
+<div class="container mx-auto bg-white p-6 rounded-lg shadow-md mt-6">
+  <div class="bg-red-50 border border-red-300 p-4 rounded-md shadow-sm">
+    <h3 class="text-lg font-semibold text-red-700 mb-3">⚠️ Danger Zone</h3>
+    <p class="text-sm text-red-600 mb-4">
+      Aksi berikut bersifat permanen dan tidak dapat dibatalkan.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4">
+      <% if (team.leader._id.toString() === user._id.toString()) { %>
+        <button class="delete-team bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md">
+          Hapus Tim
+        </button>
+      <% } else { %>
+        <button class="quit-team bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-md">
+          Keluar dari Tim
+        </button>
+      <% } %>
+    </div>
+  </div>
+</div>
+
 </body>
 
 <script>
@@ -183,6 +205,58 @@
         }
       });
     });
+        // Hapus Tim
+    document.querySelector(".delete-team")?.addEventListener("click", () => {
+      Swal.fire({
+        title: "Hapus Tim?",
+        text: "Semua data tim akan dihapus permanen!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, hapus!",
+        cancelButtonText: "Batal"
+      }).then(result => {
+        if (result.isConfirmed) {
+          fetch(`/teams/${teamId}/delete`, {
+            method: "POST"
+          })
+          .then(res => {
+            if (!res.ok) throw new Error("Gagal menghapus tim");
+            Swal.fire("Terhapus!", "Tim berhasil dihapus.", "success")
+              .then(() => window.location.href = "/teams");
+          })
+          .catch(err => {
+            Swal.fire("Error", err.message || "Terjadi kesalahan.", "error");
+          });
+        }
+      });
+    });
+
+    // Keluar dari Tim
+    document.querySelector(".quit-team")?.addEventListener("click", () => {
+      Swal.fire({
+        title: "Keluar dari Tim?",
+        text: "Apakah kamu yakin ingin keluar dari tim ini?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, keluar!",
+        cancelButtonText: "Batal"
+      }).then(result => {
+        if (result.isConfirmed) {
+          fetch(`/teams/${teamId}/quit`, {
+            method: "POST"
+          })
+          .then(res => {
+            if (!res.ok) throw new Error("Gagal keluar dari tim");
+            Swal.fire("Berhasil", "Kamu telah keluar dari tim.", "success")
+              .then(() => window.location.href = "/teams");
+          })
+          .catch(err => {
+            Swal.fire("Error", err.message || "Terjadi kesalahan.", "error");
+          });
+        }
+      });
+    });
+
   });
 </script>
 </html>

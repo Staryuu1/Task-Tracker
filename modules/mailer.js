@@ -4,8 +4,9 @@ const cron = require('node-cron');
 const mongoose = require('mongoose');
 const Task = require('../models/Task');
 const User = require('../models/User');
-
+const Team = require('../models/Team');  // Adjust the path as needed
 const Profile = require('../models/Profile');  // Adjust the path as needed
+
 
 
 
@@ -57,6 +58,7 @@ const checkAndSendEmailReminders = async () => {
         today.setHours(0, 0, 0, 0);
 
         const reminderDays = [4, 3, 2, 1];
+
         for (const daysBefore of reminderDays) {
             const reminderDate = new Date(today);
             reminderDate.setDate(today.getDate() + daysBefore);
@@ -85,10 +87,10 @@ const checkAndSendEmailReminders = async () => {
             }
 
             for (const [userId, userTasks] of Object.entries(tasksByUser)) {
-                let user = await User.findById(userId);
-                let profile = await Profile.findOne({ user: userId });
+                const user = await User.findById(userId);
+                const profile = await Profile.findOne({ user: userId });
 
-                if (user && user.email && profile.emailVerified) {
+                if (user && user.email && profile?.emailVerified) {
                     let htmlContent = `<h3>🔔 Reminder: You have ${userTasks.length} task(s) due in ${daysBefore} day(s)!</h3><ul>`;
 
                     userTasks.forEach((task) => {
@@ -101,6 +103,32 @@ const checkAndSendEmailReminders = async () => {
                     console.log(`📨 Email reminder sent to ${user.email} (${userTasks.length} tasks)`);
                 } else {
                     console.log(`⚠️ User ${userId} does not have a valid email.`);
+                }
+
+                // 🔁 Kirim ke anggota tim jika tugas bertipe 'team'
+                for (const task of userTasks) {
+                    if (task.category?.toLowerCase() === 'team') {
+                        const teams = await Team.find({ tasks: task._id }).populate('members');
+                        console.log(`👥 Found ${teams.length} team(s) for this task.`);
+
+                        for (const team of teams) {
+                            for (const member of team.members) {
+                                if (String(member._id) === String(userId)) continue; // skip owner
+
+                                const memberUser = await User.findById(member._id);
+                                const memberProfile = await Profile.findOne({ user: member._id });
+
+                                if (memberUser?.email && memberProfile?.emailVerified) {
+                                    let msg = `<h3>👥 Team Task Reminder</h3><p><strong>${task.title}</strong><br/>Due Date: ${task.dueDate.toLocaleDateString('id-ID', { timeZone: 'Asia/Jakarta' })}<br/>Description: ${task.description || '-'}</p><p>🚀 Please collaborate and complete this task on time.</p>`;
+
+                                    await sendEmailReminder(memberUser.email, `Team Task Reminder: "${task.title}" due in ${daysBefore} day(s)`, msg);
+                                    console.log(`📨 Email reminder sent to team member ${memberUser.email}`);
+                                } else {
+                                    console.log(`⚠️ Member ${member._id} does not have a valid email.`);
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

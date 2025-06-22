@@ -269,5 +269,41 @@ router.post('/:id/add-meet', ensureAuthenticated, async (req, res) => {
     }
 });
 
+// Hapus tim (hanya leader)
+router.post('/:id/delete', ensureAuthenticated, async (req, res) => {
+    try {
+        const team = await Team.findById(req.params.id);
+        if (!team) return res.status(404).send('Tim tidak ditemukan');
+        if (!team.leader.equals(req.user._id)) {
+            return res.status(403).send('Hanya leader yang dapat menghapus tim');
+        }
+        await Team.findByIdAndDelete(req.params.id);
+        // Opsional: hapus semua task terkait tim ini
+        await Task.deleteMany({ _id: { $in: team.tasks } });
+        res.redirect('/teams');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Gagal menghapus tim');
+    }
+});
+
+// Quit team (anggota keluar dari tim, leader tidak bisa quit)
+router.post('/:id/quit', ensureAuthenticated, async (req, res) => {
+    try {
+        const team = await Team.findById(req.params.id);
+        if (!team) return res.status(404).send('Tim tidak ditemukan');
+        if (team.leader.equals(req.user._id)) {
+            return res.status(403).send('Leader tidak bisa keluar dari tim. Silakan hapus tim jika ingin keluar.');
+        }
+        // Hapus user dari daftar anggota
+        team.members = team.members.filter(memberId => !memberId.equals(req.user._id));
+        await team.save();
+        res.redirect('/teams');
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Gagal keluar dari tim');
+    }
+});
+
 
 module.exports = router;

@@ -32,8 +32,15 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
 - [ ] ** Team/Collab Task System
    - [x] Membuat Team dan Mengundang Anggota
    - [x] Membuat Tugas Team
-   - [ ] Mengirim Reminder jika tugas deadline ke semua member
+   - [x] Mengirim Reminder jika tugas deadline ke semua member
    - [ ] Mencari Bug Dan Error
+- [ ] ** Improve ai integration
+   - [x] implementasi menggunakan openrouter
+   - [ ] Memperluas crud (edit task dan lain lain)
+   - [ ] Mencari Bug dan Error
+- [ ] ** payment gateway integration
+   - [x] implementasi midtrans
+   - [ ] Mencari Bug dan Error
 ## ⚡ Instalasi dan Menjalankan Proyek
 1. **Clone Repository**
    ```sh
