@@ -1,6 +1,6 @@
 ---
 config:
-  layout: fixed
+  layout: elk
 ---
 flowchart TD
  subgraph Authentication["Authentication"]
@@ -27,54 +27,68 @@ flowchart TD
         taskModel("Task.js")
         teamModel("Team.js")
         notesModel("Notes.js")
+        transactionModel("Transaction.js")
   end
- subgraph noGroup["NoGroup"]
+ subgraph Transactions["Transactions"]
+        upgradePage("upgrade.ejs")
+        transactionRoutes("transactionRoutes.js")
+  end
+ subgraph NoGroup["NoGroup"]
         verificationSuccessPage("verification-success.ejs")
         reminderService("reminder.js")
         emailService("emailer.js")
   end
-    profilePage -- "POST /profile/update-password" --> profileRoutes
-    profilePage -- "POST /profile/notification-setting" --> profileRoutes
-    profilePage -- "POST /profile/delete-account" --> profileRoutes subgraph Admin["Admin"]
-        adminDashboardPage("admin/adminDashboard.ejs")
-        adminUsersPage("admin/adminUsers.ejs")
+ subgraph Admin["Admin"]
+        adminDashboardPage("admin/<br>adminDashboard.ejs")
+        adminUsersPage("admin/<br>adminUsers.ejs")
+        adminTransactionsPage("admin/<br>adminTransactions.ejs")
         adminRoutes("adminRoutes.js")
   end
-    dashboardPage -- GET /teams --> teamsIndexPage
     userEntity["user"] -- GET /auth/login --> loginPage
     userEntity -- GET /auth/register --> registerPage
     loginPage -- POST /auth/login --> authRoutes
     registerPage -- POST /auth/register --> authRoutes
     authRoutes -- Success --> redirectTasks["GET /tasks"]
     redirectTasks -- Renders --> dashboardPage
+    authRoutes --> userModel
     dashboardPage -- GET /profile --> profilePage
     profilePage -- "POST /profile/edit-phone/:id" --> profileRoutes
     profilePage -- "POST /profile/edit-name/:id" --> profileRoutes
-    userEntity -- "GET /profile/verify-phone/:token or GET teams/:id/invite/:token" --> verificationSuccessPage
+    profilePage -- "POST /profile/update-password" --> profileRoutes
+    profilePage -- "POST /profile/notification-setting" --> profileRoutes
+    profilePage -- "POST /profile/delete-account" --> profileRoutes
+    profilePage -- GET /upgrade --> upgradePage
     profileRoutes --> reminderService & profileModel & emailService
-    reminderService -- Mengirim --> whatsAppMessage["WhatsApp Message"]
-    emailService -- Mengirim --> emailMessage["Email"]
+    upgradePage -- "POST /midtrans-token" --> transactionRoutes
+    upgradePage -- "GET /check-status" --> transactionRoutes
+    transactionRoutes --> userModel & transactionModel
     dashboardPage -- POST /tasks/add --> taskRoutes
     dashboardPage -- POST /tasks/complete/:id --> taskRoutes
     dashboardPage -- POST /tasks/edit/:id --> taskRoutes
     dashboardPage -- POST /tasks/delete/:id --> taskRoutes
     dashboardPage -- POST /tasks/addnotes --> taskRoutes
     dashboardPage -- POST /tasks/deletenotes/:id --> taskRoutes
-    dashboardPage -- GET /tasks-in-month --> taskRoutes
-    dashboardPage -- GET /tasks-in-day --> taskRoutes
-    authRoutes --> userModel
+    dashboardPage -- "GET /tasks-in-month" --> taskRoutes
+    dashboardPage -- "GET /tasks-in-day" --> taskRoutes
     taskRoutes --> taskModel & notesModel
+    dashboardPage -- GET /teams --> teamsIndexPage
     teamsIndexPage -- POST /teams/create --> teamRoutes
-    teamsIndexPage -- get /teams/:id --> teamsShowPage
+    teamsIndexPage -- GET /teams/:id --> teamsShowPage
     teamsShowPage -- "POST /teams/:id/add-member" --> teamRoutes
-    teamRoutes -- mengirim invite ke email --> emailService
+    teamRoutes -- send invite to email --> emailService
     teamRoutes --> teamModel
-    adminDashboardPage -- GET /admin/dashboard --> adminRoutes
-    adminUsersPage -- GET /admin/users --> adminRoutes
+    userEntity -- "GET /profile/verify-phone/:token<br>or /teams/:id/invite/:token" --> verificationSuccessPage
+    reminderService -- Send --> whatsAppMessage["WhatsApp Message"]
+    emailService -- Send --> emailMessage["Email"]
+    dashboardPage -- GET /admin --> adminDashboardPage
+    adminDashboardPage -- GET /admin/users --> adminUsersPage
     adminUsersPage -- POST /admin/users/:id/role --> adminRoutes
     adminUsersPage -- POST /admin/users/:id/plan --> adminRoutes
     adminUsersPage -- POST /admin/users/:id/delete --> adminRoutes
-    adminRoutes --> userModel & taskModel & teamModel
+    adminRoutes --> userModel & taskModel & teamModel & transactionModel
+    adminDashboardPage -- GET /admin/transactions --> adminTransactionsPage
+    adminTransactionsPage -- "POST /check-status/:trxId" --> adminRoutes
+    Profile --> n1["Untitled Node"]
     style loginPage fill:#ccf,stroke:#333,stroke-width:2px
     style registerPage fill:#ccf,stroke:#333,stroke-width:2px
     style authRoutes fill:#fcf,stroke:#333,stroke-width:2px
@@ -83,20 +97,24 @@ flowchart TD
     style dashboardPage fill:#ccf,stroke:#333,stroke-width:2px
     style taskRoutes fill:#fcf,stroke:#333,stroke-width:2px
     style teamsIndexPage fill:#ccf,stroke:#333,stroke-width:2px
-    style teamsShowPage fill:#ccf,stroke:#333,stroke-width:2px
+    style teamsShowPage stroke-width:2px
     style teamRoutes fill:#fcf,stroke:#333,stroke-width:2px
     style userModel fill:#fcf,stroke:#333,stroke-width:2px
     style profileModel fill:#fcf,stroke:#333,stroke-width:2px
     style taskModel fill:#fcf,stroke:#333,stroke-width:2px
     style teamModel fill:#fcf,stroke:#333,stroke-width:2px
     style notesModel fill:#fcf,stroke:#333,stroke-width:2px
+    style transactionModel fill:#fcf,stroke:#333,stroke-width:2px
+    style upgradePage fill:#ccf,stroke:#333,stroke-width:2px
+    style transactionRoutes fill:#fcf,stroke:#333,stroke-width:2px
     style verificationSuccessPage fill:#ccf,stroke:#333,stroke-width:2px
     style reminderService fill:#fcf,stroke:#333,stroke-width:2px
     style emailService fill:#fcf,stroke:#333,stroke-width:2px
+    style adminDashboardPage fill:#ccf,stroke:#333,stroke-width:2px
+    style adminUsersPage fill:#ccf,stroke:#333,stroke-width:2px
+    style adminTransactionsPage fill:#ccf,stroke:#333,stroke-width:2px
+    style adminRoutes fill:#fcf,stroke:#333,stroke-width:2px
     style userEntity fill:#f9f,stroke:#333,stroke-width:2px
     style redirectTasks fill:#cfc,stroke:#333,stroke-width:2px
     style whatsAppMessage fill:#ccf,stroke:#333,stroke-width:2px
     style emailMessage fill:#ccf,stroke:#333,stroke-width:2px
-    style adminDashboardPage fill:#ccf,stroke:#333,stroke-width:2px
-    style adminUsersPage fill:#ccf,stroke:#333,stroke-width:2px
-    style adminRoutes fill:#fcf,stroke:#333,stroke-width:2px

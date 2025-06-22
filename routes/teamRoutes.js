@@ -156,6 +156,7 @@ router.get("/:id/invite/:token", ensureAuthenticated, async (req, res) => {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await User.findOne({ email: decoded.email });
 
+       
         if (!user) return res.status(404).send('Pengguna tidak ditemukan');
 
         if (!req.user._id.equals(user._id)) {

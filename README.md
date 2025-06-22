@@ -56,6 +56,13 @@ Task Tracker adalah aplikasi manajemen tugas berbasis web yang memungkinkan peng
    SMTP_SECURE=true
    SMTP_USER= your_email@gmail.com
    SMTP_PASS= password
+
+
+   MIDTRANS_SERVER_KEY=your midtrans server key
+   MIDTRANS_CLIENT_KEY=your midtrans client key
+
+   
+   OPENROUTER_API_KEY= openrouter api key
    ```
 4. **Jalankan Server**
    ```sh

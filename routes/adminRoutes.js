@@ -106,7 +106,6 @@ router.post("/users/:id/plan", ensureAdmin, async (req, res) => {
   }
 });
 
-
 router.post("/users/:id/delete", ensureAdmin, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.params.id);
@@ -165,14 +164,14 @@ router.post('/check-status/:trxId', ensureAdmin, async (req, res) => {
         
         return res.json({
           title: 'Berhasil',
-          message: `Status transaksi ${trx.orderId} berhasil diperbarui".`,
+          message: `Status transaksi berhasil diperbarui.`,
           icon: 'success'
         });
       }
     }
     return res.json({
       title: 'Gagal',
-      message: `Status Transaksi ${trx.orderId} Tidak Pending`,
+      message: `Gagal Memperbarui status transaksi. Status saat ini: ${trx.status}`,
       icon: 'error'
     });
     
