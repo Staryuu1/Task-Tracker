@@ -9,14 +9,17 @@ const checkUpcomingMeetings = async () => {
     console.log('📆 Mengecek meeting yang akan dimulai dalam 30 menit...');
 
     try {
-        const now = new Date();
-       const in30Minutes = new Date(now.getTime() + 30 * 60 * 1000);
-        console.log(now)
+        const now = new Date(Date.now());
+        const in30Minutes = new Date(now.getTime() + 30 * 60 * 1000);
+        console.log('now (UTC):', nowUTC.toISOString());
+        console.log('in 30 mins (UTC):', in30MinutesUTC.toISOString());
+        
         const meetings = await Task.find({
             category: 'Meeting',
             dueDate: { $gte: now ,$lte: in30Minutes },
             completed: false
         }).populate('user');
+        console.log(meetings)
         console.log(`📋 Ditemukan ${meetings.length} meeting.`);
 
         for (const task of meetings) {
