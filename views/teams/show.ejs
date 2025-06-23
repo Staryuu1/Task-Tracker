@@ -172,6 +172,8 @@
       if (!title || !description || !dueDate || !priority) {
         return Swal.fire("Oops!", "All fields are required.", "warning");
       }
+      const localDate = new Date(dueDate);
+      const dueDateUTC = localDate.toISOString();
 
       Swal.fire({
         title: "Schedule Meeting?",
@@ -182,7 +184,7 @@
         cancelButtonText: "Cancel"
       }).then(result => {
         if (result.isConfirmed) {
-          handlePost(`/teams/${teamId}/add-meet`, { title, description, dueDate, priority }, "Meeting scheduled.");
+          handlePost(`/teams/${teamId}/add-meet`, { title, description, dueDate: dueDateUTC, priority }, "Meeting scheduled.");
         }
       });
     });

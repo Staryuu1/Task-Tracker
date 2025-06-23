@@ -103,7 +103,7 @@ const buildMeetingEmail = (task) => {
 
 const initializeMeetingCron = () => {
     console.log('✅ Cron meeting reminder diaktifkan, cek setiap 30 menit...');
-    cron.schedule('*/30 * * * *', () => {
+    cron.schedule('*/1 * * * *', () => {
         console.log('🔁 Menjalankan cron: cek meeting...');
         checkUpcomingMeetings();
     });
