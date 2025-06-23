@@ -12,7 +12,7 @@ const checkUpcomingMeetings = async () => {
         const now = new Date(Date.now());
         const in30Minutes = new Date(now.getTime() + 30 * 60 * 1000);
         console.log('now (UTC):', now);
-        console.log('in 30 mins (UTC):', in30MinutesUTC);
+        console.log('in 30 mins (UTC):', in30Minutes);
         
         const meetings = await Task.find({
             category: 'Meeting',
