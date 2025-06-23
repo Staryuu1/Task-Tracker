@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/User");
 const Task = require("../models/Task");
 const Team = require("../models/Team");
+const Profile = require("../models/Profile");
 const midtransClient = require('midtrans-client');
 const Transaction = require('../models/Transaction');
 
@@ -69,14 +70,29 @@ router.get("/", ensureAdmin, async (req, res) => {
 
 router.get("/users", ensureAdmin, async (req, res) => {
   try {
-    const users = await User.find({}, "_id username email role plan");
+    const users = await User.find({}, "_id username email role plan").lean();
+    const profiles = await Profile.find({}, "user emailVerified phoneVerified").lean();
+
+    // Gabungkan data user dengan profile
+    const usersWithProfile = users.map(user => {
+      const profile = profiles.find(p => p.user.toString() === user._id.toString());
+      return {
+        ...user,
+        profile: profile || {}  
+      };
+    });
+
     const message = req.session.message;
     delete req.session.message;
-    res.render("admin/adminUsers", { users, message });
+
+    res.render("admin/adminUsers", { users: usersWithProfile, message });
+
   } catch (err) {
+    console.error(err);
     res.status(500).send("Internal Server Error");
   }
 });
+
 
 
 router.post("/users/:id/role", ensureAdmin, async (req, res) => {

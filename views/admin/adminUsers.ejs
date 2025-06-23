@@ -30,16 +30,33 @@
                 <tr>
                   <th>Username</th>
                   <th>Email</th>
+                  <th>Email Status</th> 
+                  <th>WhatsApp</th>  
                   <th>Role</th>
                   <th>Plan</th>
                   <th>Action</th>
                 </tr>
               </thead>
+              
               <tbody>
                 <% users.forEach(function(user) { %>
                   <tr>
                     <td><%= user.username %></td>
                     <td><%= user.email %></td>
+                    <td>
+                      <% if (user.profile && user.profile.emailVerified) { %>
+                        <span class="badge badge-success">Verified</span>
+                      <% } else { %>
+                        <span class="badge badge-secondary">Not Verified</span>
+                      <% } %>
+                    </td>
+                    <td>
+                      <% if (user.profile && user.profile.phoneVerified) { %>
+                        <span class="badge badge-success">Verified</span>
+                      <% } else { %>
+                        <span class="badge badge-secondary">Not Verified</span>
+                      <% } %>
+                    </td>
                     <td>
                       <form method="POST" action="/admin/users/<%= user._id %>/role" class="form-inline mb-1 update-role-form">
                         <select name="role" class="form-control form-control-sm mr-2">
