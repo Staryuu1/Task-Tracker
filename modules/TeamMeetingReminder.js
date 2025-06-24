@@ -17,7 +17,9 @@ const checkUpcomingMeetings = async () => {
         const meetings = await Task.find({
             category: 'Meeting',
             dueDate: { $gte: now ,$lte: in30Minutes },
-            completed: false
+            completed: false,
+            reminderSent: false
+
         }).populate('user');
         console.log(meetings)
         console.log(`📋 Ditemukan ${meetings.length} meeting.`);
@@ -76,6 +78,8 @@ const checkUpcomingMeetings = async () => {
                     }
                 }
             }
+            task.reminderSent = true;
+            await task.save();
         }
 
         console.log('✅ Pengingat meeting selesai dikirim.');
@@ -103,7 +107,7 @@ const buildMeetingEmail = (task) => {
 
 const initializeMeetingCron = () => {
     console.log('✅ Cron meeting reminder diaktifkan, cek setiap 30 menit...');
-    cron.schedule('*/1 * * * *', () => {
+    cron.schedule('*/10 * * * *', () => {
         console.log('🔁 Menjalankan cron: cek meeting...');
         checkUpcomingMeetings();
     });

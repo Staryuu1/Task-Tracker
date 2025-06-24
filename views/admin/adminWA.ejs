@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kontrol WhatsApp Bot</title>
+  <!-- AdminLTE & dependencies -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+  <%- include('./sidebar', { activePage: 'wa' }) %>
+  <div class="content-wrapper" style="min-height:100vh; overflow-y:auto; height:100vh;">
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Kontrol WhatsApp Bot</h1>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="content">
+      <div class="container-fluid">
+        <div class="card card-primary">
+          <div class="card-body">
+            <h5>Status Bot</h5>
+            <div id="wa-status" class="font-monospace text-primary mb-3">Memuat status...</div>
+            <h5>QR Code Login</h5>
+            <img id="wa-qr" src="/qrcode" alt="QR WhatsApp" class="img-thumbnail mb-2" style="width:256px;height:256px;" onerror="this.style.display='none'">
+            <div id="wa-qr-info" class="text-muted mb-3">Scan QR ini dengan WhatsApp untuk login bot.</div>
+            <button id="wa-restart" class="btn btn-warning">Restart Bot</button>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-md-12">
+            <div class="row">
+              <div class="col-lg-3 col-6 mb-3">
+                <div class="small-box bg-info">
+                  <div class="inner">
+                    <h3><%= typeof stats !== 'undefined' ? stats.incoming : 0 %></h3>
+                    <p>Pesan Masuk</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-inbox"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6 mb-3">
+                <div class="small-box bg-success">
+                  <div class="inner">
+                    <h3><%= typeof stats !== 'undefined' ? stats.outgoing : 0 %></h3>
+                    <p>Pesan Keluar</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-paper-plane"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6 mb-3">
+                <div class="small-box bg-warning">
+                  <div class="inner">
+                    <h3><%= typeof stats !== 'undefined' ? stats.uniqueUsers : 0 %></h3>
+                    <p>User Unik</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-users"></i>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-3 col-6 mb-3">
+                <div class="small-box bg-secondary">
+                  <div class="inner">
+                    <h3><%= typeof stats !== 'undefined' ? stats.totalBroadcast : 0 %></h3>
+                    <p>Total Broadcast</p>
+                  </div>
+                  <div class="icon">
+                    <i class="fas fa-bullhorn"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row mt-4">
+          <div class="col-md-6">
+            <div class="card card-success">
+              <div class="card-header"><h5 class="card-title mb-0">Broadcast WhatsApp</h5></div>
+              <div class="card-body">
+                <form id="broadcastForm">
+                  <div class="form-group">
+                    <label for="broadcastMessage">Pesan Broadcast</label>
+                    <textarea class="form-control" id="broadcastMessage" rows="3" required></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-success mt-2">Kirim Broadcast</button>
+                </form>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card card-info">
+              <div class="card-header"><h5 class="card-title mb-0">Kirim Pesan Manual</h5></div>
+              <div class="card-body">
+                <form id="sendForm">
+                  <div class="form-group">
+                    <label for="waNumber">Nomor WhatsApp (format 628...)</label>
+                    <input type="text" class="form-control" id="waNumber" required>
+                  </div>
+                  <div class="form-group mt-2">
+                    <label for="waMessage">Pesan</label>
+                    <textarea class="form-control" id="waMessage" rows="2" required></textarea>
+                  </div>
+                  <button type="submit" class="btn btn-primary mt-2">Kirim Pesan</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<script>
+fetch('/admin/wa-status')
+  .then(res => res.json())
+  .then(data => {
+    document.getElementById('wa-status').textContent = data.status || 'Tidak diketahui';
+    if (!data.status || data.status === 'Tidak diketahui') {
+      Swal.fire('Status Bot', 'Status bot tidak dapat dideteksi atau belum login.', 'warning');
+    }
+  })
+  .catch(() => {
+    document.getElementById('wa-status').textContent = 'Tidak diketahui';
+    Swal.fire('Gagal', 'Gagal memuat status bot WhatsApp.', 'error');
+  });
+
+const waQr = document.getElementById('wa-qr');
+waQr.onerror = function() {
+  this.style.display = 'none';
+  Swal.fire('QR Code Error', 'Gagal memuat QR Code WhatsApp. Silakan restart bot atau cek koneksi.', 'error');
+};
+
+document.getElementById('wa-restart').onclick = function() {
+  Swal.fire({
+    title: 'Restart Bot?',
+    text: 'Apakah Anda yakin ingin me-restart WhatsApp Bot? QR code baru mungkin akan muncul dan sesi login bisa berubah.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Ya, restart!',
+    cancelButtonText: 'Batal'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      fetch('/admin/wa-restart', { method: 'POST' })
+        .then(res => res.json())
+        .then(data => {
+          Swal.fire('Restart Bot', data.message || 'Bot direstart', 'success').then(() => location.reload());
+        })
+        .catch(() => {
+          Swal.fire('Gagal', 'Gagal me-restart bot.', 'error');
+        });
+    }
+  });
+};
+// Broadcast
+$('#broadcastForm').on('submit', function(e) {
+  e.preventDefault();
+  const message = $('#broadcastMessage').val().trim();
+  if (!message) return Swal.fire('Pesan kosong', 'Isi pesan broadcast!', 'warning');
+  fetch('/admin/wa-broadcast', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message })
+  })
+  .then(res => res.json())
+  .then(data => {
+    Swal.fire(data.title || 'Info', data.message, data.icon || 'info');
+  })
+  .catch(() => Swal.fire('Gagal', 'Gagal mengirim broadcast', 'error'));
+});
+
+$('#sendForm').on('submit', function(e) {
+  e.preventDefault();
+  const number = $('#waNumber').val().trim();
+  const message = $('#waMessage').val().trim();
+  if (!number || !message) return Swal.fire('Lengkapi data', 'Nomor dan pesan wajib diisi!', 'warning');
+  fetch('/admin/wa-send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ number, message })
+  })
+  .then(res => res.json())
+  .then(data => {
+    Swal.fire(data.title || 'Info', data.message, data.icon || 'info');
+  })
+  .catch(() => Swal.fire('Gagal', 'Gagal mengirim pesan', 'error'));
+});
+</script>
+<style>
+/* Agar sidebar tetap fixed dan hanya konten yang scrollable */
+@media (min-width: 768px) {
+  .main-sidebar, .main-sidebar::before {
+    position: fixed !important;
+    height: 100vh;
+  }
+  .content-wrapper {
+    margin-left: 250px !important;
+    overflow-y: auto;
+    height: 100vh;
+  }
+}
+</style>
+</body>
+</html>

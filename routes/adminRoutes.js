@@ -5,6 +5,7 @@ const Team = require("../models/Team");
 const Profile = require("../models/Profile");
 const midtransClient = require('midtrans-client');
 const Transaction = require('../models/Transaction');
+const { client, sendWhatsAppMessage } = require('../modules/reminder');
 
 const router = express.Router();
 
@@ -199,5 +200,94 @@ router.post('/check-status/:trxId', ensureAdmin, async (req, res) => {
       });
   }
 });
+
+
+router.get('/wa', ensureAdmin, (req, res) => {
+  res.render('admin/adminWA', { stats: waStats });
+});
+
+
+router.get('/wa-status', ensureAdmin, async (req, res) => {
+  try {
+    let status = 'Tidak diketahui';
+    if (client.info && client.info.wid) {
+      status = 'Online sebagai: ' + client.info.pushname + ' (' + client.info.wid.user + ')';
+    } else if (client.info && client.info.me) {
+      status = 'Online sebagai: ' + client.info.me.user;
+    } else if (client.info && client.info.connected) {
+      status = 'Online';
+    } else if (client.info && client.info.authenticated) {
+      status = 'Authenticated, menunggu koneksi...';
+    } else if (client.info && client.info.pairing) {
+      status = 'Menunggu scan QR';
+    } else {
+      status = client.info ? JSON.stringify(client.info) : 'Belum login';
+    }
+    res.json({ status });
+  } catch (err) {
+    res.json({ status: 'Tidak diketahui' });
+  }
+});
+
+
+router.post('/wa-restart', ensureAdmin, async (req, res) => {
+  try {
+    await client.destroy();
+    await client.initialize();
+    res.json({ message: 'Bot WhatsApp berhasil direstart.' });
+  } catch (err) {
+    res.status(500).json({ message: 'Gagal restart bot.' });
+  }
+});
+
+// WhatsApp Broadcast (admin)
+router.post('/wa-broadcast', ensureAdmin, async (req, res) => {
+  try {
+    const { message } = req.body;
+    if (!message) return res.json({ title: 'Gagal', message: 'Pesan tidak boleh kosong', icon: 'warning' });
+    const profiles = await Profile.find({ phoneNumber: { $exists: true }, phoneVerified: true, whatsappNotif: true });
+    let success = 0, failed = 0;
+    for (const profile of profiles) {
+      try {
+        await sendWhatsAppMessage(profile.phoneNumber, message);
+        success++;
+      } catch {
+        failed++;
+      }
+    }
+    waStats.totalBroadcast = (waStats.totalBroadcast || 0) + 1;
+    res.json({ title: 'Broadcast Selesai', message: `Terkirim: ${success}, Gagal: ${failed}`, icon: 'success' });
+  } catch (err) {
+    res.json({ title: 'Gagal', message: 'Gagal mengirim broadcast', icon: 'error' });
+  }
+});
+
+
+router.post('/wa-send', ensureAdmin, async (req, res) => {
+  try {
+    const { number, message } = req.body;
+    if (!number || !message) return res.json({ title: 'Gagal', message: 'Nomor dan pesan wajib diisi', icon: 'warning' });
+    await sendWhatsAppMessage(number, message);
+    res.json({ title: 'Berhasil', message: 'Pesan berhasil dikirim', icon: 'success' });
+  } catch (err) {
+    res.json({ title: 'Gagal', message: 'Gagal mengirim pesan', icon: 'error' });
+  }
+});
+
+let waStats = { incoming: 0, outgoing: 0, uniqueUsers: 0, totalBroadcast: 0 };
+if (client) {
+  client.on('message', msg => {
+    waStats.incoming++;
+    waStats.lastSender = msg.from;
+    waStats.uniqueUsersSet = waStats.uniqueUsersSet || new Set();
+    waStats.uniqueUsersSet.add(msg.from);
+    waStats.uniqueUsers = waStats.uniqueUsersSet.size;
+  });
+  const origSend = client.sendMessage;
+  client.sendMessage = async function(...args) {
+    waStats.outgoing++;
+    return origSend.apply(this, args);
+  };
+}
 
 module.exports = router;

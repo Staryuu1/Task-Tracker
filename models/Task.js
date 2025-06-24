@@ -7,7 +7,8 @@ const TaskSchema = new mongoose.Schema({
     dueDate: { type: Date, required: true },
     priority: { type: String, enum: ['low', 'medium', 'high'], required: true },
     category: { type: String, enum: ['Task', 'Personal', 'Work','Team','Meeting'],required: true},
-    completed: { type: Boolean, default: false } // Status tugas
+    completed: { type: Boolean, default: false }, // Status tugas
+    reminderSent: { type: Boolean, default: false }, 
 });
 
 module.exports = mongoose.model('Task', TaskSchema);
