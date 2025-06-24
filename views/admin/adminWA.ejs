@@ -140,11 +140,6 @@ fetch('/admin/wa-status')
     Swal.fire('Gagal', 'Gagal memuat status bot WhatsApp.', 'error');
   });
 
-const waQr = document.getElementById('wa-qr');
-waQr.onerror = function() {
-  this.style.display = 'none';
-  Swal.fire('QR Code Error', 'Gagal memuat QR Code WhatsApp. Silakan restart bot atau cek koneksi.', 'error');
-};
 
 document.getElementById('wa-restart').onclick = function() {
   Swal.fire({
