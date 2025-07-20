@@ -61,7 +61,7 @@ const openRouterCall = async (message, userPhone) => {
         2️⃣ If the user adds a task but some fields are missing:
         {
         "action": "request_detail",
-        "missing": ["dueDate", "priority"], 
+        "missing": ["dueDate", "priority","description" or "title"], 
         "message": "Apa deadline dan prioritas (low, medium, high) tugas ini?"
         }
 
@@ -76,7 +76,7 @@ const openRouterCall = async (message, userPhone) => {
         "title": "Judul tugas" or ["Tugas A", "Tugas B"],
         "message": "Tugas '{title}' telah ditandai selesai."
         }
-
+        
         🧠 RULES TO FOLLOW:
         - Category is always: "Task"
         - Use today’s date (${today}) for "hari ini", "besok", etc.

@@ -4,7 +4,7 @@ const TransactionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   orderId: String,
   snapToken: String,
-  status: String, // pending, success, failed, expired
+  status: String, 
   createdAt: { type: Date, default: Date.now }
 });
 
