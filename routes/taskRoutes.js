@@ -11,7 +11,7 @@ router.get("/", ensureAuthenticated, async (req, res) => {
         const userid = req.user.id
         const Personaltasks = await Task.find({ user: req.user.id });
         const notes = await Notes.find({ user: req.user.id });
-        const Teams = await await Team.find({ members: req.user._id }).populate('tasks');
+        const Teams =  await Team.find({ members: req.user._id }).populate('tasks');
         const teamTasks = Teams.flatMap(team => team.tasks);
         const FindTaskID = await Task.find({_id: teamTasks})
         let tasks = [...Personaltasks, ...FindTaskID];

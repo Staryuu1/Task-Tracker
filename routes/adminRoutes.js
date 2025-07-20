@@ -202,6 +202,8 @@ router.post('/check-status/:trxId', ensureAdmin, async (req, res) => {
 });
 
 
+let waStats = { incoming: 0, outgoing: 0, uniqueUsers: 0, totalBroadcast: 0 };
+
 router.get('/wa', ensureAdmin, (req, res) => {
   res.render('admin/adminWA', { stats: waStats });
 });
@@ -274,7 +276,7 @@ router.post('/wa-send', ensureAdmin, async (req, res) => {
   }
 });
 
-let waStats = { incoming: 0, outgoing: 0, uniqueUsers: 0, totalBroadcast: 0 };
+
 if (client) {
   client.on('message', msg => {
     waStats.incoming++;

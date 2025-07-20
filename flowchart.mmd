@@ -42,6 +42,7 @@ flowchart TD
         adminDashboardPage("admin/<br>adminDashboard.ejs")
         adminUsersPage("admin/<br>adminUsers.ejs")
         adminTransactionsPage("admin/<br>adminTransactions.ejs")
+        adminWAPage("admin/<br>adminWA.ejs")
         adminRoutes("adminRoutes.js")
   end
     userEntity["user"] -- GET /auth/login --> loginPage
@@ -88,7 +89,11 @@ flowchart TD
     adminRoutes --> userModel & taskModel & teamModel & transactionModel
     adminDashboardPage -- GET /admin/transactions --> adminTransactionsPage
     adminTransactionsPage -- "POST /check-status/:trxId" --> adminRoutes
-    Profile --> n1["Untitled Node"]
+    adminDashboardPage -- GET /admin/wa --> adminWAPage
+    adminWAPage -- POST /admin/wa-broadcast --> adminRoutes
+    adminWAPage -- POST /admin/wa-send --> adminRoutes
+    adminWAPage -- POST /admin/wa-restart --> adminRoutes
+    adminWAPage -- GET /admin/wa-status --> adminRoutes
     style loginPage fill:#ccf,stroke:#333,stroke-width:2px
     style registerPage fill:#ccf,stroke:#333,stroke-width:2px
     style authRoutes fill:#fcf,stroke:#333,stroke-width:2px
@@ -113,6 +118,7 @@ flowchart TD
     style adminDashboardPage fill:#ccf,stroke:#333,stroke-width:2px
     style adminUsersPage fill:#ccf,stroke:#333,stroke-width:2px
     style adminTransactionsPage fill:#ccf,stroke:#333,stroke-width:2px
+    style adminWAPage fill:#ccf,stroke:#333,stroke-width:2px
     style adminRoutes fill:#fcf,stroke:#333,stroke-width:2px
     style userEntity fill:#f9f,stroke:#333,stroke-width:2px
     style redirectTasks fill:#cfc,stroke:#333,stroke-width:2px
