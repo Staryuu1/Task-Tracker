@@ -184,15 +184,25 @@ router.post('/check-status/:trxId', ensureAdmin, async (req, res) => {
           message: `Status transaksi berhasil diperbarui.`,
           icon: 'success'
         });
+      } else {
+        return res.json({
+          title: 'Gagal',
+          message: `Gagal Memperbarui status transaksi. Status saat ini: ${trx.status}`,
+          icon: 'error'
+        });
       }
+    } else {
+      return res.json({
+        title: 'Gagal',
+        message: `Transaksi sudah tidak dalam status pending. Status saat ini: ${trx.status}`,
+        icon: 'warning'
+      });
     }
-    return res.json({
-      title: 'Gagal',
-      message: `Gagal Memperbarui status transaksi. Status saat ini: ${trx.status}`,
-      icon: 'error'
-    });
+
+    
     
   } catch (err) {
+    console.error('Error checking transaction status:', err);
       return res.status(500).json({
         title: 'Gagal Memeriksa Status',
         message: 'Terjadi kesalahan saat memeriksa ulang status transaksi.',
@@ -275,7 +285,6 @@ router.post('/wa-send', ensureAdmin, async (req, res) => {
     res.json({ title: 'Gagal', message: 'Gagal mengirim pesan', icon: 'error' });
   }
 });
-
 
 if (client) {
   client.on('message', msg => {

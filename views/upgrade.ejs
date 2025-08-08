@@ -37,7 +37,7 @@
                     .then(res => res.json())
                     .then(data => {
                     if (data.status === 'settlement' || data.status === 'capture') {
-                        Swal.fire('Berhasil!', 'Upgrade ke Pro berhasil. Silakan login ulang.', 'success')
+                        Swal.fire('Berhasil!', 'Upgrade ke Pro berhasil.', 'success')
                         .then(() => window.location.reload());
                     } else if (attempt < 5) {
                         setTimeout(() => pollCheckStatus(attempt + 1), 2000); // Coba lagi setelah 2 detik
@@ -47,28 +47,28 @@
                 });
             }
 
-            payBtn.onclick = function() {
-                fetch('/upgrade/midtrans-token', { method: 'POST' })
-                    .then(res => res.json())
-                    .then(data => {
-                    if (data.token) {
-                        window.snap.pay(data.token, {
-                        onSuccess: function(result) {
-                            pollCheckStatus();
-                        },
-                        onPending: function(result) {
-                            Swal.fire('Menunggu pembayaran', 'Selesaikan pembayaran untuk upgrade ke Pro.', 'info');
-                        },
-                        onError: function(result) {
-                            Swal.fire('Gagal', 'Terjadi kesalahan pembayaran.', 'error');
-                        },
-                        onClose: function() {}
-                        });
-                    } else {
-                        Swal.fire('Gagal', 'Tidak bisa memulai pembayaran.', 'error');
-                    }
+          payBtn.onclick = function() {
+            fetch('/upgrade/midtrans-token', { method: 'POST' })
+              .then(res => res.json())
+              .then(data => {
+              if (data.token) {
+                  window.snap.pay(data.token, {
+                  onSuccess: function(result) {
+                    pollCheckStatus();
+                  },
+                  onPending: function(result) {
+                    Swal.fire('Menunggu pembayaran', 'Selesaikan pembayaran untuk upgrade ke Pro.', 'info');
+                  },
+                  onError: function(result) {
+                    Swal.fire('Gagal', 'Terjadi kesalahan pembayaran.', 'error');
+                  },
+                  onClose: function() {}
                 });
-            };
+              } else {
+                Swal.fire('Gagal', 'Tidak bisa memulai pembayaran.', 'error');
+              }
+            });
+          };
         }
       });
     </script>
